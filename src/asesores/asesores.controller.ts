@@ -39,4 +39,9 @@ export class AsesoresController {
   remove(@Param('id') id: string) {
     return this.asesoresService.remove(+id);
   }
+
+  @Get(':id/connect')
+  connect(@Param('id') id: string) {
+    return this.asesoresService.connect(+id);
+  }
 }

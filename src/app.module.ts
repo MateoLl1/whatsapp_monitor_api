@@ -5,6 +5,8 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AsesoresModule } from './asesores/asesores.module';
 import { ConversacionesModule } from './conversaciones/conversaciones.module';
+import { MensajesModule } from './mensajes/mensajes.module';
+import { EvolutionModule } from './evolution/evolution.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { ConversacionesModule } from './conversaciones/conversaciones.module';
     }),
     AsesoresModule,
     ConversacionesModule,
+    MensajesModule,
+    EvolutionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

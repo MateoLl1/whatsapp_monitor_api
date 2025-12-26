@@ -1,26 +1,38 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateConversacioneDto } from './dto/create-conversacione.dto';
 import { UpdateConversacioneDto } from './dto/update-conversacione.dto';
+import { Conversacion } from './entities/conversacion.entity';
 
 @Injectable()
 export class ConversacionesService {
-  create(createConversacioneDto: CreateConversacioneDto) {
-    return 'This action adds a new conversacione';
+  constructor(
+    @InjectRepository(Conversacion)
+    private conversacionesRepo: Repository<Conversacion>,
+  ) {}
+
+  create(dto: CreateConversacioneDto) {
+    const conversacion = this.conversacionesRepo.create(dto);
+    return this.conversacionesRepo.save(conversacion);
   }
 
   findAll() {
-    return `This action returns all conversaciones`;
+    return this.conversacionesRepo.find({ relations: ['asesor'] });
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} conversacione`;
+    return this.conversacionesRepo.findOne({
+      where: { id },
+      relations: ['asesor'],
+    });
   }
 
-  update(id: number, updateConversacioneDto: UpdateConversacioneDto) {
-    return `This action updates a #${id} conversacione`;
+  update(id: number, dto: UpdateConversacioneDto) {
+    return this.conversacionesRepo.update(id, dto);
   }
 
   remove(id: number) {
-    return `This action removes a #${id} conversacione`;
+    return this.conversacionesRepo.delete(id);
   }
 }
