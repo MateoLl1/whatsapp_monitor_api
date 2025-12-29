@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Conversacion } from '../../conversaciones/entities/conversacion.entity';
 
 @Entity({ name: 'asesores' })
 export class Asesor {
@@ -10,4 +11,9 @@ export class Asesor {
 
   @Column({ default: true })
   activo: boolean;
+
+  @Column({ length: 20, nullable: true }) numero_whatsapp: string;
+
+  @OneToMany(() => Conversacion, (conv) => conv.asesor)
+  conversaciones: Conversacion[];
 }

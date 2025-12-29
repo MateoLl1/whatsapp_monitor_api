@@ -28,6 +28,14 @@ export class MensajesService {
     });
   }
 
+  findByConversacion(conversacionId: number) {
+    return this.mensajesRepo.find({
+      where: { conversacion: { id: conversacionId } },
+      relations: ['conversacion'],
+      order: { timestamp: 'ASC' },
+    });
+  }
+
   update(id: number, dto: UpdateMensajeDto) {
     return this.mensajesRepo.update(id, dto);
   }
