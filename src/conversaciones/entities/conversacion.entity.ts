@@ -1,29 +1,39 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+} from 'typeorm';
 import { Asesor } from '../../asesores/entities/asesore.entity';
 import { Mensaje } from '../../mensajes/entities/mensaje.entity';
 
 @Entity({ name: 'conversaciones' })
 export class Conversacion {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: 'co_id' })
   id: number;
 
-  @Column({ length: 30 })
+  @Column({ name: 'co_cliente_numero', length: 30 })
   cliente_numero: string;
 
-  @ManyToOne(() => Asesor, (asesor) => asesor.conversaciones)
-  asesor: Asesor;
+  @Column({ name: 'co_nom_cliente', nullable: true })
+  nombre_cliente: string;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ name: 'co_fe_inicio', type: 'timestamp', nullable: true })
   inicio: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ name: 'co_fe_fin', type: 'timestamp', nullable: true })
   fin: Date;
 
-  @Column({ length: 20, nullable: true })
+  @Column({ name: 'co_estado', length: 20, nullable: true })
   estado: string;
 
-  @Column({ nullable: true })
-  nombre_cliente: string;
+  @ManyToOne(() => Asesor, (asesor) => asesor.conversaciones, {
+    nullable: false,
+  })
+  @JoinColumn({ name: 'co_asesor_id' })
+  asesor: Asesor;
 
   @OneToMany(() => Mensaje, (msg) => msg.conversacion)
   mensajes: Mensaje[];

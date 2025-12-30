@@ -3,9 +3,10 @@ import { ConversacionesService } from './conversaciones.service';
 import { ConversacionesController } from './conversaciones.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Conversacion } from './entities/conversacion.entity';
+import { Asesor } from '../asesores/entities/asesore.entity';
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Conversacion])
+    TypeOrmModule.forFeature([Conversacion,Asesor])
   ],
   controllers: [ConversacionesController],
   providers: [ConversacionesService],

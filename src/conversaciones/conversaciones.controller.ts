@@ -1,14 +1,14 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { ConversacionesService } from './conversaciones.service';
-import { CreateConversacioneDto } from './dto/create-conversacione.dto';
-import { UpdateConversacioneDto } from './dto/update-conversacione.dto';
+import { UpdateConversacioneDto } from './dto/update-conversacion.dto';
+import { CreateConversacionDto } from './dto/create-conversacion.dto';
 
 @Controller('conversaciones')
 export class ConversacionesController {
   constructor(private readonly conversacionesService: ConversacionesService) {}
 
   @Post()
-  create(@Body() createConversacioneDto: CreateConversacioneDto) {
+  create(@Body() createConversacioneDto: CreateConversacionDto) {
     return this.conversacionesService.create(createConversacioneDto);
   }
 

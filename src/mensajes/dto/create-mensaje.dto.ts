@@ -1,6 +1,6 @@
 export class CreateMensajeDto {
-  conversacionId: number;
+  me_conv_id: number;
   mensaje: string;
-  timestamp: Date;
+  fecha: Date;           
   fromMe: boolean;
 }

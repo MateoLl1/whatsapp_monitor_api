@@ -4,16 +4,30 @@ import { Repository } from 'typeorm';
 import { Mensaje } from './entities/mensaje.entity';
 import { CreateMensajeDto } from './dto/create-mensaje.dto';
 import { UpdateMensajeDto } from './dto/update-mensaje.dto';
+import { Conversacion } from '../conversaciones/entities/conversacion.entity';
 
 @Injectable()
 export class MensajesService {
   constructor(
     @InjectRepository(Mensaje)
     private mensajesRepo: Repository<Mensaje>,
+    @InjectRepository(Conversacion)
+    private conversacionesRepo: Repository<Conversacion>,
   ) {}
 
-  create(dto: CreateMensajeDto) {
-    const mensaje = this.mensajesRepo.create(dto);
+  async create(dto: CreateMensajeDto) {
+    const conversacion = await this.conversacionesRepo.findOneBy({
+      id: dto.me_conv_id,
+    });
+    if (!conversacion) {
+      throw new Error(`Conversación con id ${dto.me_conv_id} no encontrada`);
+    }
+    const mensaje = this.mensajesRepo.create({
+      mensaje: dto.mensaje,
+      fecha: dto.fecha,
+      fromMe: dto.fromMe,
+      conversacion,
+    });
     return this.mensajesRepo.save(mensaje);
   }
 
@@ -32,7 +46,6 @@ export class MensajesService {
     return this.mensajesRepo.find({
       where: { conversacion: { id: conversacionId } },
       relations: ['conversacion'],
-      order: { timestamp: 'ASC' },
     });
   }
 

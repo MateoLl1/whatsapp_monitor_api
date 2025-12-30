@@ -3,16 +3,17 @@ import { Conversacion } from '../../conversaciones/entities/conversacion.entity'
 
 @Entity({ name: 'asesores' })
 export class Asesor {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: 'as_id' })
   id: number;
 
-  @Column({ length: 100 })
+  @Column({ name: 'as_nombre', length: 100 })
   nombre: string;
 
-  @Column({ default: true })
+  @Column({ name: 'as_activo', default: true })
   activo: boolean;
 
-  @Column({ length: 20, nullable: true }) numero_whatsapp: string;
+  @Column({ name: 'as_num_whatsapp', length: 20 })
+  numero_whatsapp: string;
 
   @OneToMany(() => Conversacion, (conv) => conv.asesor)
   conversaciones: Conversacion[];

@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Asesor } from './entities/asesore.entity';
-import { CreateAsesorDto } from './dto/create-asesores.dto';
+import { CreateAsesorDto } from './dto/create-asesor.dto';
 import { EvolutionService } from '../evolution/evolution.service';
-import { UpdateAsesorDto } from './dto/update-asesores.dto';
+import { UpdateAsesorDto } from './dto/update-asesor.dto';
 
 @Injectable()
 export class AsesoresService {

@@ -1,6 +1,6 @@
-export class CreateConversacioneDto {
+export class CreateConversacionDto {
   cliente_numero: string;
-  asesorId: number;
+  co_asesor_id: number; 
   inicio?: Date;
   fin?: Date;
   estado?: string;
