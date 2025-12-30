@@ -1,15 +1,22 @@
-import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import { Repository } from 'typeorm';
+import { Asesor } from '../asesores/entities/asesore.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class EvolutionService {
   private baseUrl = process.env.API_EVOLUTION_URL || 'http://localhost:8080';
   private apiKey = process.env.API_EVOLUTION_KEY;
 
-  constructor(private readonly http: HttpService) {}
+  constructor(
+    private readonly http: HttpService,
+    @InjectRepository(Asesor)
+    private readonly asesorRepo: Repository<Asesor>,
+  ) {}
 
-  async createInstance(instanceName: string, webhookUrl: string) {
+  async createInstance(instanceName: string) {
     const body = {
       instanceName,
       qrcode: false,
@@ -18,7 +25,7 @@ export class EvolutionService {
       alwaysOnline: false,
       readMessages: false,
       webhook: {
-        url: webhookUrl,
+        url: process.env.WEBHOOK_N8N_SEGUIMIENTO!,
         byEvents: false,
         base64: false,
         events: [
@@ -53,6 +60,8 @@ export class EvolutionService {
         headers: { apikey: this.apiKey },
       }),
     );
+
+    await this.asesorRepo.update({ nombre: instanceName }, { activo: true });
     return response.data;
   }
 
@@ -83,6 +92,7 @@ export class EvolutionService {
         headers: { apikey: this.apiKey },
       }),
     );
+    await this.asesorRepo.update({ nombre: instanceName }, { activo: false });
     return response.data;
   }
 
@@ -92,6 +102,8 @@ export class EvolutionService {
         headers: { apikey: this.apiKey },
       }),
     );
+
+    await this.asesorRepo.update({ nombre: instanceName }, { activo: false });
     return response.data;
   }
 

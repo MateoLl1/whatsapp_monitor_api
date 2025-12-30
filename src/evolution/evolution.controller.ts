@@ -8,9 +8,8 @@ export class EvolutionController {
   @Post('create')
   async createInstance(
     @Body('instanceName') instanceName: string,
-    @Body('webhookUrl') webhookUrl: string,
   ) {
-    return this.evolutionService.createInstance(instanceName, webhookUrl);
+    return this.evolutionService.createInstance(instanceName);
   }
 
   @Get('state/:instance')
@@ -28,7 +27,7 @@ export class EvolutionController {
     return this.evolutionService.deleteInstance(name);
   }
 
-  @Delete('logut/:name')
+  @Delete('logout/:name')
   async logoutInstance(@Param('name') name: string) {
     return this.evolutionService.logoutInstance(name);
   }

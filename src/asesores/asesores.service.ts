@@ -19,7 +19,6 @@ export class AsesoresService {
     const saved = await this.asesoresRepo.save(asesor);
     await this.evolutionService.createInstance(
       saved.nombre,
-      process.env.WEBHOOK_N8N_SEGUIMIENTO!,
     );
     return saved;
   }
