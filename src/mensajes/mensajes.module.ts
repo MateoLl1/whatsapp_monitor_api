@@ -4,10 +4,12 @@ import { MensajesController } from './mensajes.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Mensaje } from './entities/mensaje.entity';
 import { Conversacion } from '../conversaciones/entities/conversacion.entity';
+import { EvolutionModule } from '../evolution/evolution.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Mensaje,Conversacion])
+    TypeOrmModule.forFeature([Mensaje,Conversacion]),
+    EvolutionModule
   ],
   controllers: [MensajesController],
   providers: [MensajesService],

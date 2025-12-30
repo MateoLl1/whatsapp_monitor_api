@@ -103,4 +103,20 @@ export class EvolutionService {
     );
     return response.data;
   }
+
+  async sendTextMessage(instanceName: string, number: string, text: string) {
+    const response = await firstValueFrom(
+      this.http.post(
+        `${this.baseUrl}/message/sendText/${instanceName}`,
+        {
+          number: `${number}`,
+          text,
+        },
+        {
+          headers: { apikey: this.apiKey },
+        },
+      ),
+    );
+    return response.data;
+  }
 }

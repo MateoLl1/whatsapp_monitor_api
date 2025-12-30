@@ -3,4 +3,5 @@ export class CreateMensajeDto {
   mensaje: string;
   fecha: Date;           
   fromMe: boolean;
+  conversacion: { id: number };
 }

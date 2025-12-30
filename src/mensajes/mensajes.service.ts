@@ -5,6 +5,7 @@ import { Mensaje } from './entities/mensaje.entity';
 import { CreateMensajeDto } from './dto/create-mensaje.dto';
 import { UpdateMensajeDto } from './dto/update-mensaje.dto';
 import { Conversacion } from '../conversaciones/entities/conversacion.entity';
+import { EvolutionService } from '../evolution/evolution.service';
 
 @Injectable()
 export class MensajesService {
@@ -13,22 +14,41 @@ export class MensajesService {
     private mensajesRepo: Repository<Mensaje>,
     @InjectRepository(Conversacion)
     private conversacionesRepo: Repository<Conversacion>,
+    private evolutionService: EvolutionService,
   ) {}
 
   async create(dto: CreateMensajeDto) {
-    const conversacion = await this.conversacionesRepo.findOneBy({
-      id: dto.me_conv_id,
+    const conversacion = await this.conversacionesRepo.findOne({
+      where: { id: dto.conversacion?.id },
+      relations: ['asesor'],
     });
     if (!conversacion) {
       throw new Error(`Conversación con id ${dto.me_conv_id} no encontrada`);
     }
+
     const mensaje = this.mensajesRepo.create({
       mensaje: dto.mensaje,
-      fecha: dto.fecha,
+      fecha: dto.fecha ?? new Date(),
       fromMe: dto.fromMe,
       conversacion,
     });
-    return this.mensajesRepo.save(mensaje);
+    const saved = await this.mensajesRepo.save(mensaje);
+
+    if (dto.fromMe) {
+      const instanceName = conversacion.asesor.nombre;
+      const numeroCliente = conversacion.cliente_numero;
+      if (!instanceName) {
+        throw new Error(`El asesor no tiene instancia configurada`);
+      }
+
+      await this.evolutionService.sendTextMessage(
+        instanceName,
+        numeroCliente,
+        dto.mensaje,
+      );
+    }
+
+    return saved;
   }
 
   findAll() {
