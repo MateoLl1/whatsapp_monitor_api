@@ -15,11 +15,10 @@ export class AsesoresService {
   ) {}
 
   async create(dto: CreateAsesorDto) {
+    console.log({dto});
     const asesor = this.asesoresRepo.create(dto);
     const saved = await this.asesoresRepo.save(asesor);
-    await this.evolutionService.createInstance(
-      saved.nombre,
-    );
+    await this.evolutionService.createInstance(saved.nombre);
     return saved;
   }
 
@@ -58,5 +57,19 @@ export class AsesoresService {
       throw new Error('Asesor no encontrado');
     }
     return this.evolutionService.connectInstance(asesor.nombre);
+  }
+
+  async getStats() {
+    const asesores = await this.asesoresRepo.find();
+
+    const total = asesores.length;
+    const conectados = asesores.filter((a) => a.activo).length;
+    const desconectados = total - conectados;
+
+    return {
+      asesores: total,
+      conectados,
+      desconectados,
+    };
   }
 }

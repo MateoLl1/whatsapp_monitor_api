@@ -34,20 +34,19 @@ export class MensajesService {
       throw new Error(`El asesor no tiene instancia configurada`);
     }
 
-    // ✅ Enviar directamente con Evolution
+
     await this.evolutionService.sendTextMessage(
       instanceName,
       numeroCliente,
       dto.mensaje,
     );
-
-    // ✅ Construir objeto Mensaje manualmente
+    
     const mensaje: Mensaje = {
-      id: Date.now(), // puedes usar un timestamp como id temporal
+      id: Date.now(), 
       conversacion,
       mensaje: dto.mensaje,
       fecha: dto.fecha ?? new Date(),
-      fromMe: true, // siempre true
+      fromMe: true, 
     };
 
     return mensaje;

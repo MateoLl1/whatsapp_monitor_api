@@ -9,7 +9,7 @@ export class Asesor {
   @Column({ name: 'as_nombre', length: 100 })
   nombre: string;
 
-  @Column({ name: 'as_activo', default: true })
+  @Column({ name: 'as_activo', default: false })
   activo: boolean;
 
   @Column({ name: 'as_num_whatsapp', length: 20 })

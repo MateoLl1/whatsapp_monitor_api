@@ -25,6 +25,11 @@ export class AsesoresController {
     return this.asesoresService.findAll();
   }
 
+  @Get('/stats')
+  getStats(){
+    return this.asesoresService.getStats();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.asesoresService.findOne(+id);
@@ -44,4 +49,6 @@ export class AsesoresController {
   connect(@Param('id') id: string) {
     return this.asesoresService.connect(+id);
   }
+
+  
 }

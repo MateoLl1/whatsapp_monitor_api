@@ -61,7 +61,7 @@ export class EvolutionService {
       }),
     );
 
-    await this.asesorRepo.update({ nombre: instanceName }, { activo: true });
+    await this.asesorRepo.update({ nombre: instanceName }, { activo: false });
     return response.data;
   }
 
