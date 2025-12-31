@@ -22,33 +22,35 @@ export class MensajesService {
       where: { id: dto.conversacion?.id },
       relations: ['asesor'],
     });
+
     if (!conversacion) {
       throw new Error(`Conversación con id ${dto.me_conv_id} no encontrada`);
     }
 
-    const mensaje = this.mensajesRepo.create({
-      mensaje: dto.mensaje,
-      fecha: dto.fecha ?? new Date(),
-      fromMe: dto.fromMe,
-      conversacion,
-    });
-    const saved = await this.mensajesRepo.save(mensaje);
+    const instanceName = conversacion.asesor.nombre;
+    const numeroCliente = conversacion.cliente_numero;
 
-    if (dto.fromMe) {
-      const instanceName = conversacion.asesor.nombre;
-      const numeroCliente = conversacion.cliente_numero;
-      if (!instanceName) {
-        throw new Error(`El asesor no tiene instancia configurada`);
-      }
-
-      await this.evolutionService.sendTextMessage(
-        instanceName,
-        numeroCliente,
-        dto.mensaje,
-      );
+    if (!instanceName) {
+      throw new Error(`El asesor no tiene instancia configurada`);
     }
 
-    return saved;
+    // ✅ Enviar directamente con Evolution
+    await this.evolutionService.sendTextMessage(
+      instanceName,
+      numeroCliente,
+      dto.mensaje,
+    );
+
+    // ✅ Construir objeto Mensaje manualmente
+    const mensaje: Mensaje = {
+      id: Date.now(), // puedes usar un timestamp como id temporal
+      conversacion,
+      mensaje: dto.mensaje,
+      fecha: dto.fecha ?? new Date(),
+      fromMe: true, // siempre true
+    };
+
+    return mensaje;
   }
 
   findAll() {
