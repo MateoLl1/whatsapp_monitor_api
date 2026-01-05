@@ -4,10 +4,11 @@ import { AsesoresController } from './asesores.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Asesor } from './entities/asesore.entity';
 import { EvolutionModule } from '../evolution/evolution.module';
+import { Mensaje } from '../mensajes/entities/mensaje.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Asesor]),
+    TypeOrmModule.forFeature([Asesor,Mensaje]),
     EvolutionModule,
   ],
   controllers: [AsesoresController],

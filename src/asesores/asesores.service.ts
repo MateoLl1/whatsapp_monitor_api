@@ -1,21 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { Asesor } from './entities/asesore.entity';
 import { CreateAsesorDto } from './dto/create-asesor.dto';
 import { EvolutionService } from '../evolution/evolution.service';
 import { UpdateAsesorDto } from './dto/update-asesor.dto';
+import { Mensaje } from '../mensajes/entities/mensaje.entity';
 
 @Injectable()
 export class AsesoresService {
   constructor(
     @InjectRepository(Asesor)
     private asesoresRepo: Repository<Asesor>,
+    @InjectRepository(Mensaje)
+    private mensajesRepo: Repository<Mensaje>,
     private readonly evolutionService: EvolutionService,
   ) {}
 
   async create(dto: CreateAsesorDto) {
-    console.log({dto});
     const asesor = this.asesoresRepo.create(dto);
     const saved = await this.asesoresRepo.save(asesor);
     await this.evolutionService.createInstance(saved.nombre);
@@ -61,15 +63,16 @@ export class AsesoresService {
 
   async getStats() {
     const asesores = await this.asesoresRepo.find();
-
     const total = asesores.length;
     const conectados = asesores.filter((a) => a.activo).length;
     const desconectados = total - conectados;
-
-    return {
-      asesores: total,
-      conectados,
-      desconectados,
-    };
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const mañana = new Date(hoy);
+    mañana.setDate(mañana.getDate() + 1);
+    const mensajesHoy = await this.mensajesRepo.count({
+      where: { fecha: Between(hoy, mañana) },
+    });
+    return { asesores: total, conectados, desconectados, mensajesHoy };
   }
 }
