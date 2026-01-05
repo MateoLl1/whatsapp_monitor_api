@@ -10,12 +10,13 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -240,
-        16
+        224,
+        1632
       ],
-      "id": "7ac76d43-dd0d-4f45-8dc8-9e51f2635e94",
-      "name": "Webhook",
-      "webhookId": "77e74597-930e-4d47-ab7f-97e562bbd066"
+      "id": "66e0854b-5165-4b09-bef1-d09c9046b593",
+      "name": "Webhook1",
+      "webhookId": "77e74597-930e-4d47-ab7f-97e562bbd066",
+      "disabled": true
     },
     {
       "parameters": {
@@ -74,6 +75,18 @@
               "name": "event",
               "value": "={{ $json.body.event }}",
               "type": "string"
+            },
+            {
+              "id": "05187792-7b08-47d2-b151-7086392ffd3c",
+              "name": "state",
+              "value": "={{ $json.body.data.state }}",
+              "type": "string"
+            },
+            {
+              "id": "969ba463-814a-439e-8d09-29cd8e41b548",
+              "name": "wauid",
+              "value": "={{ ($json.body?.sender ?? $json.sender).split('@')[0] }}",
+              "type": "string"
             }
           ]
         },
@@ -82,11 +95,11 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        0,
-        16
+        464,
+        1632
       ],
-      "id": "9567f88b-c4e8-48d0-ad81-60057219ecbe",
-      "name": "Mapeando mensaje"
+      "id": "cd7209f3-0fae-4406-9b85-ef6a500bc0d9",
+      "name": "Mapeando mensaje1"
     },
     {
       "parameters": {
@@ -116,11 +129,11 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1040,
-        16
+        2112,
+        1648
       ],
-      "id": "a1c3b365-fb77-4a7b-a103-3491d09feff2",
-      "name": "¿Existe la conversacion?"
+      "id": "23794d09-f497-4255-bc53-a49deb49470b",
+      "name": "¿Existe la conversacion?1"
     },
     {
       "parameters": {
@@ -134,7 +147,7 @@
           "conditions": [
             {
               "id": "b87eefe1-0a09-4620-85f7-44fd60b869f9",
-              "leftValue": "={{ $json.conversation }}",
+              "leftValue": "={{ $('Enrutar evento1').item.json.conversation }}",
               "rightValue": "",
               "operator": {
                 "type": "string",
@@ -150,11 +163,11 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.3,
       "position": [
-        448,
-        16
+        1520,
+        1648
       ],
-      "id": "72926f50-47b3-41e5-b5a9-0cb6d31688b9",
-      "name": "Filter"
+      "id": "7df6b35b-d926-4863-a8a2-69173ed0beca",
+      "name": "Filter1"
     },
     {
       "parameters": {
@@ -168,7 +181,7 @@
           "conditions": [
             {
               "id": "d57224ae-5c51-4b3e-a0ec-4afba6125d18",
-              "leftValue": "={{ $('Mapeando mensaje').item.json.fromMe }}",
+              "leftValue": "={{ $('Mapeando mensaje1').item.json.fromMe }}",
               "rightValue": false,
               "operator": {
                 "type": "boolean",
@@ -184,11 +197,11 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        2112,
-        -336
+        3184,
+        1296
       ],
-      "id": "1235742d-7a90-469c-8369-e14a03c70711",
-      "name": "fromMe?"
+      "id": "fdbb195b-0003-4419-9118-abd26426e0cb",
+      "name": "fromMe?1"
     },
     {
       "parameters": {
@@ -202,7 +215,7 @@
           "conditions": [
             {
               "id": "faedda7e-381b-4ca6-bae6-e9e84d9602a8",
-              "leftValue": "={{ $('Mapeando mensaje').item.json.fromMe }}",
+              "leftValue": "={{ $('Mapeando mensaje1').item.json.fromMe }}",
               "rightValue": "",
               "operator": {
                 "type": "boolean",
@@ -218,60 +231,27 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1952,
-        128
+        3024,
+        1760
       ],
-      "id": "cadae3dd-5ec8-419a-a565-ffa7820df418",
-      "name": "from Me?"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "f6069843-7725-4792-baf9-68e6dce36283",
-              "leftValue": "={{ $json.event }}",
-              "rightValue": "logout.instance",
-              "operator": {
-                "type": "string",
-                "operation": "notEquals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        208,
-        16
-      ],
-      "id": "df4f0ef8-9d0f-4dac-b5bd-843816341442",
-      "name": "If"
+      "id": "fe575821-0df2-464c-ad47-c0ffb87afa39",
+      "name": "from Me?1"
     },
     {
       "parameters": {
         "sendTo": "mateollerena40@gmail.com",
-        "subject": "☠️ Desconexion de Instancia",
-        "message": "=Se acaba de desconectar de la instancia.\n\n📅 Fecha: {{ $now.format(\"dd-mm-yyyy\") }}\n\n⏰ Hora: {{ $now.format(\"HH:mm:ss\") }}\n\n\nNúmero: {{ $json.sender }}\n",
+        "subject": "⚠️ Desconexion de Instancia",
+        "message": "=<!DOCTYPE html>\n<html lang=\"es\">\n  <head>\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\" />\n    <title>Notificación de desconexión</title>\n    <style>\n      body {\n        margin: 0;\n        padding: 0;\n        background: #f5f7fb;\n        font-family: Arial, Helvetica, sans-serif;\n        color: #1a1a1a;\n      }\n      .email-container {\n        max-width: 600px;\n        margin: 24px auto;\n        background: #ffffff;\n        border-radius: 8px;\n        overflow: hidden;\n        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);\n      }\n      .header {\n        background: #202c33;\n        color: #e9edef;\n        padding: 16px 20px;\n        font-size: 18px;\n        font-weight: 600;\n      }\n      .content {\n        padding: 20px;\n        line-height: 1.6;\n        font-size: 15px;\n      }\n      .row label {\n        display: inline-block;\n        width: 160px;\n        color: #555;\n        font-weight: 600;\n      }\n      .row span {\n        color: #111b21;\n      }\n      .footer {\n        padding: 16px 20px;\n        background: #f0f2f5;\n        color: #555;\n        font-size: 12px;\n        text-align: center;\n      }\n    </style>\n  </head>\n  <body>\n    <div class=\"email-container\">\n      <div class=\"header\">Se acaba de desconectar de la instancia.</div>\n\n      <div class=\"content\">\n        <div class=\"row\">\n          <label>📅 Fecha:</label>\n          <span>{{ $now.format(\"dd-MM-yyyy\") }}</span>\n        </div>\n        <div class=\"row\">\n          <label>⏰ Hora:</label>\n          <span>{{ $now.format(\"HH:mm:ss\") }}</span>\n        </div>\n        <br />\n        <div class=\"row\">\n          <label>Nombre instancia:</label>\n          <span>{{ $json.as_nombre }}</span>\n        </div>\n        <div class=\"row\">\n          <label>Número:</label>\n          <span>{{ $json.as_num_whatsapp }}</span>\n        </div>\n      </div>\n\n      <div class=\"footer\">\n        Este correo es informativo y se genera automáticamente.\n      </div>\n    </div>\n  </body>\n</html>\n",
         "options": {}
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        464,
-        256
+        1632,
+        1408
       ],
-      "id": "bd9382f9-16e7-48cc-ab1a-a37c8da1dec2",
-      "name": "Notificar desconexion",
+      "id": "bb4d05c4-3e3a-4e51-860c-623adea26c3b",
+      "name": "Notificar desconexion1",
       "webhookId": "117bc521-6052-48cc-aefe-fc2dd1889227",
       "credentials": {
         "gmailOAuth2": {
@@ -297,50 +277,8 @@
         "where": {
           "values": [
             {
-              "column": "cliente_numero",
-              "value": "={{ $json.client_number }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        736,
-        256
-      ],
-      "id": "5b4fc0d8-f50b-441a-a8ba-5c7cb77be3e8",
-      "name": "Buscar conversacion1",
-      "alwaysOutputData": true,
-      "retryOnFail": false,
-      "credentials": {
-        "postgres": {
-          "id": "7oc7RqApG6OhhiFs",
-          "name": "Postgres local"
-        }
-      },
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "operation": "select",
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "conversaciones",
-          "mode": "list",
-          "cachedResultName": "conversaciones"
-        },
-        "where": {
-          "values": [
-            {
               "column": "co_cliente_numero",
-              "value": "={{ $json.client_number }}"
+              "value": "={{ $('Mapeando mensaje1').item.json.client_number }}"
             }
           ]
         },
@@ -349,11 +287,11 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        736,
-        16
+        1808,
+        1648
       ],
-      "id": "091412a8-fa67-4202-8716-69fbc28e471c",
-      "name": "Buscar conversaciones",
+      "id": "fc239335-42c3-479d-8cf1-ad0d8a98e514",
+      "name": "Buscar conversaciones1",
       "alwaysOutputData": true,
       "credentials": {
         "postgres": {
@@ -379,49 +317,8 @@
         "where": {
           "values": [
             {
-              "column": "numero_whatsapp",
-              "value": "={{ $('Mapeando mensaje').item.json.sender }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        1456,
-        352
-      ],
-      "id": "aab7c6c3-2531-4795-92f4-af33e0e5d69f",
-      "name": "Obtener numero del asesor1",
-      "alwaysOutputData": true,
-      "credentials": {
-        "postgres": {
-          "id": "7oc7RqApG6OhhiFs",
-          "name": "Postgres local"
-        }
-      },
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "operation": "select",
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "asesores",
-          "mode": "list",
-          "cachedResultName": "asesores"
-        },
-        "where": {
-          "values": [
-            {
               "column": "as_num_whatsapp",
-              "value": "={{ $('Mapeando mensaje').item.json.sender }}"
+              "value": "={{ $('Mapeando mensaje1').item.json.sender }}"
             }
           ]
         },
@@ -430,11 +327,11 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1456,
-        128
+        2528,
+        1760
       ],
-      "id": "8c5a7508-25a7-43e6-a122-fbb92de69d82",
-      "name": "Obtener datos del asesor",
+      "id": "c966d4d1-27d4-4f3e-b5ac-a26cc2ee4174",
+      "name": "Obtener datos del asesor1",
       "alwaysOutputData": false,
       "credentials": {
         "postgres": {
@@ -460,48 +357,8 @@
         "where": {
           "values": [
             {
-              "column": "numero_whatsapp",
-              "value": "={{ $('Mapeando mensaje').item.json.sender }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        1600,
-        -528
-      ],
-      "id": "da3ef5ac-ece8-426e-9ef6-6ab6660d63c5",
-      "name": "Obtener datos asesor1",
-      "credentials": {
-        "postgres": {
-          "id": "7oc7RqApG6OhhiFs",
-          "name": "Postgres local"
-        }
-      },
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "operation": "select",
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "asesores",
-          "mode": "list",
-          "cachedResultName": "asesores"
-        },
-        "where": {
-          "values": [
-            {
               "column": "as_num_whatsapp",
-              "value": "={{ $('Mapeando mensaje').item.json.sender }}"
+              "value": "={{ $('Mapeando mensaje1').item.json.sender }}"
             }
           ]
         },
@@ -510,11 +367,11 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1600,
-        -336
+        2672,
+        1296
       ],
-      "id": "2914e7f3-6978-4266-802c-ed0fb615913d",
-      "name": "Obtener datos del asesor 2",
+      "id": "d0b53358-a35c-4cb7-8048-7a62266fab7d",
+      "name": "Obtener datos del asesor ",
       "credentials": {
         "postgres": {
           "id": "7oc7RqApG6OhhiFs",
@@ -539,123 +396,8 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "id": "={{ $('Buscar conversacion').item.json.id }}",
-            "nombre_cliente": "={{ $('Mapeando mensaje').item.json.pushName }}"
-          },
-          "matchingColumns": [
-            "id"
-          ],
-          "schema": [
-            {
-              "id": "id",
-              "displayName": "id",
-              "required": false,
-              "defaultMatch": true,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "cliente_numero",
-              "displayName": "cliente_numero",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "inicio",
-              "displayName": "inicio",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "dateTime",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "fin",
-              "displayName": "fin",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "dateTime",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "estado",
-              "displayName": "estado",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "nombre_cliente",
-              "displayName": "nombre_cliente",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "asesorId",
-              "displayName": "asesorId",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": true,
-              "removed": true
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        2448,
-        -720
-      ],
-      "id": "1e1b2a58-08f9-45b0-9e03-8f079f6c5332",
-      "name": "Actualizar nombre cliente1",
-      "credentials": {
-        "postgres": {
-          "id": "7oc7RqApG6OhhiFs",
-          "name": "Postgres local"
-        }
-      },
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "operation": "update",
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "conversaciones",
-          "mode": "list",
-          "cachedResultName": "conversaciones"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "co_id": "={{ $('¿Existe la conversacion?').item.json.co_id }}",
-            "co_nom_cliente": "={{ $('Mapeando mensaje').item.json.pushName }}"
+            "co_id": "={{ $('¿Existe la conversacion?1').item.json.co_id }}",
+            "co_nom_cliente": "={{ $('Mapeando mensaje1').item.json.pushName }}"
           },
           "matchingColumns": [
             "co_id"
@@ -739,11 +481,11 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2448,
-        -496
+        3520,
+        1136
       ],
-      "id": "40597386-cd93-479d-86fd-6e1c2159d27a",
-      "name": "Actualizar nombre del cliente",
+      "id": "ffcff1f2-9bf9-40e8-9518-58a4a62e1948",
+      "name": "Actualizar nombre del cliente1",
       "credentials": {
         "postgres": {
           "id": "7oc7RqApG6OhhiFs",
@@ -767,103 +509,10 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "fromMe": "={{ $('Mapeando mensaje').item.json.fromMe }}",
-            "mensaje": "={{ $('Mapeando mensaje').item.json.conversation }}",
-            "timestamp": "={{ $('Mapeando mensaje').item.json.date_time }}",
-            "conversacionId": "={{ $('Buscar conversacion').item.json.id }}"
-          },
-          "matchingColumns": [
-            "id"
-          ],
-          "schema": [
-            {
-              "id": "id",
-              "displayName": "id",
-              "required": false,
-              "defaultMatch": true,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "mensaje",
-              "displayName": "mensaje",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "timestamp",
-              "displayName": "timestamp",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "dateTime",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "fromMe",
-              "displayName": "fromMe",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "boolean",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "conversacionId",
-              "displayName": "conversacionId",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": true
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        2832,
-        -544
-      ],
-      "id": "4b6e46d9-0676-4c7c-af46-3c3e4b991b96",
-      "name": "Registar Mensaje1",
-      "credentials": {
-        "postgres": {
-          "id": "7oc7RqApG6OhhiFs",
-          "name": "Postgres local"
-        }
-      },
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "mensajes",
-          "mode": "list",
-          "cachedResultName": "mensajes"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "me_from_me": "={{ $('Mapeando mensaje').item.json.fromMe }}",
-            "me_conv_id": "={{ $('¿Existe la conversacion?').item.json.co_id }}",
-            "me_mensajes": "={{ $('Mapeando mensaje').item.json.conversation }}",
-            "me_fecha": "={{ $('Mapeando mensaje').item.json.date_time }}"
+            "me_from_me": "={{ $('Mapeando mensaje1').item.json.fromMe }}",
+            "me_conv_id": "={{ $('¿Existe la conversacion?1').item.json.co_id }}",
+            "me_mensajes": "={{ $('Mapeando mensaje1').item.json.conversation }}",
+            "me_fecha": "={{ $('Mapeando mensaje1').item.json.date_time }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -922,11 +571,11 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2832,
-        -320
+        3904,
+        1312
       ],
-      "id": "700b4e78-981b-499c-9a64-9799f4b2a36e",
-      "name": "Registar mensaje",
+      "id": "aeb05890-7e6b-4124-b016-ef471c0dcca3",
+      "name": "Registar mensaje1",
       "credentials": {
         "postgres": {
           "id": "7oc7RqApG6OhhiFs",
@@ -950,125 +599,11 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "cliente_numero": "={{ $('Mapeando mensaje').item.json.client_number }}",
-            "inicio": "={{ $('Mapeando mensaje').item.json.date_time }}",
-            "fin": "={{ $('Mapeando mensaje').item.json.date_time }}",
-            "estado": "ACTIVO",
-            "nombre_cliente": "={{ $('Mapeando mensaje').item.json.pushName }}",
-            "asesorId": "={{ $json.id }}"
-          },
-          "matchingColumns": [
-            "id"
-          ],
-          "schema": [
-            {
-              "id": "id",
-              "displayName": "id",
-              "required": false,
-              "defaultMatch": true,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "cliente_numero",
-              "displayName": "cliente_numero",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "inicio",
-              "displayName": "inicio",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "dateTime",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "fin",
-              "displayName": "fin",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "dateTime",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "estado",
-              "displayName": "estado",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "nombre_cliente",
-              "displayName": "nombre_cliente",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "asesorId",
-              "displayName": "asesorId",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": true,
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        2544,
-        448
-      ],
-      "id": "bfe033ab-46cc-4bcb-a040-ae419a3c01b9",
-      "name": "Crear Conversacion  cliente1",
-      "credentials": {
-        "postgres": {
-          "id": "7oc7RqApG6OhhiFs",
-          "name": "Postgres local"
-        }
-      },
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "conversaciones",
-          "mode": "list",
-          "cachedResultName": "conversaciones"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
             "co_asesor_id": "={{ $json.as_id }}",
-            "co_cliente_numero": "={{ $('Mapeando mensaje').item.json.client_number }}",
-            "co_fe_inicio": "={{ $('Mapeando mensaje').item.json.date_time }}",
-            "co_fe_fin": "={{ $('Mapeando mensaje').item.json.date_time }}",
-            "co_nom_cliente": "={{ $('Mapeando mensaje').item.json.pushName }}",
+            "co_cliente_numero": "={{ $('Mapeando mensaje1').item.json.client_number }}",
+            "co_fe_inicio": "={{ $('Mapeando mensaje1').item.json.date_time }}",
+            "co_fe_fin": "={{ $('Mapeando mensaje1').item.json.date_time }}",
+            "co_nom_cliente": "={{ $('Mapeando mensaje1').item.json.pushName }}",
             "co_estado": "ABIERTO"
           },
           "matchingColumns": [],
@@ -1146,11 +681,11 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2544,
-        240
+        3616,
+        1872
       ],
-      "id": "322326ec-7312-4b69-9610-1f9e3194c44f",
-      "name": "Crear conversacion cliente",
+      "id": "543ce9c0-4264-4e18-b093-a40a5b88ed29",
+      "name": "Crear conversacion cliente1",
       "credentials": {
         "postgres": {
           "id": "7oc7RqApG6OhhiFs",
@@ -1174,124 +709,10 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "cliente_numero": "={{ $('Mapeando mensaje').item.json.client_number }}",
-            "inicio": "={{ $('Mapeando mensaje').item.json.date_time }}",
-            "fin": "={{ $('Mapeando mensaje').item.json.date_time }}",
-            "estado": "ACTIVO",
-            "asesorId": "={{ $json.id }}"
-          },
-          "matchingColumns": [
-            "id"
-          ],
-          "schema": [
-            {
-              "id": "id",
-              "displayName": "id",
-              "required": false,
-              "defaultMatch": true,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "cliente_numero",
-              "displayName": "cliente_numero",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "inicio",
-              "displayName": "inicio",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "dateTime",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "fin",
-              "displayName": "fin",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "dateTime",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "estado",
-              "displayName": "estado",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "nombre_cliente",
-              "displayName": "nombre_cliente",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "asesorId",
-              "displayName": "asesorId",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": true,
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        2560,
-        -176
-      ],
-      "id": "9d437d7a-da81-47f7-a2b6-f597687d86d6",
-      "name": "Crear Conversacion  asesor1",
-      "credentials": {
-        "postgres": {
-          "id": "7oc7RqApG6OhhiFs",
-          "name": "Postgres local"
-        }
-      },
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "conversaciones",
-          "mode": "list",
-          "cachedResultName": "conversaciones"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
             "co_asesor_id": "={{ $json.as_id }}",
-            "co_cliente_numero": "={{ $('Mapeando mensaje').item.json.client_number }}",
-            "co_fe_inicio": "={{ $('Mapeando mensaje').item.json.date_time }}",
-            "co_fe_fin": "={{ $('Mapeando mensaje').item.json.date_time }}",
+            "co_cliente_numero": "={{ $('Mapeando mensaje1').item.json.client_number }}",
+            "co_fe_inicio": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+            "co_fe_fin": "={{ $('Mapeando mensaje1').item.json.date_time }}",
             "co_estado": "ABIERTO"
           },
           "matchingColumns": [],
@@ -1370,11 +791,11 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2544,
-        16
+        3616,
+        1648
       ],
-      "id": "1b60164c-41be-40d1-8a14-aee7b5304dc5",
-      "name": "Crear conversacion asesor",
+      "id": "60aa39a4-e381-478b-87b5-16ff7550ab44",
+      "name": "Crear conversacion asesor1",
       "credentials": {
         "postgres": {
           "id": "7oc7RqApG6OhhiFs",
@@ -1398,103 +819,10 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "fromMe": "={{ $('Mapeando mensaje').item.json.fromMe }}",
-            "timestamp": "={{ $('Mapeando mensaje').item.json.date_time }}",
-            "mensaje": "={{ $('Mapeando mensaje').item.json.conversation }}",
-            "conversacionId": "={{ $json.id }}"
-          },
-          "matchingColumns": [
-            "id"
-          ],
-          "schema": [
-            {
-              "id": "id",
-              "displayName": "id",
-              "required": false,
-              "defaultMatch": true,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "mensaje",
-              "displayName": "mensaje",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "timestamp",
-              "displayName": "timestamp",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "dateTime",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "fromMe",
-              "displayName": "fromMe",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "boolean",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "conversacionId",
-              "displayName": "conversacionId",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": true
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        3376,
-        112
-      ],
-      "id": "d3e64e3e-fc86-4ea4-8aa8-d6f0f7e04f8e",
-      "name": "Crear mensaje1",
-      "credentials": {
-        "postgres": {
-          "id": "7oc7RqApG6OhhiFs",
-          "name": "Postgres local"
-        }
-      },
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "mensajes",
-          "mode": "list",
-          "cachedResultName": "mensajes"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "me_from_me": "={{ $('Mapeando mensaje').item.json.fromMe }}",
+            "me_from_me": "={{ $('Mapeando mensaje1').item.json.fromMe }}",
             "me_conv_id": "={{ $json.co_id }}",
             "me_fecha": "={{ $json.co_fe_inicio }}",
-            "me_mensajes": "={{ $('Mapeando mensaje').item.json.conversation }}"
+            "me_mensajes": "={{ $('Mapeando mensaje1').item.json.conversation }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -1553,186 +881,606 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        3088,
-        112
+        4160,
+        1744
       ],
-      "id": "0e732cf4-edcf-4cf9-8594-21e24cb5cbc1",
-      "name": "Registar mensaje 2",
+      "id": "92fb16ad-0683-4b17-b393-eb926dd0432d",
+      "name": "Registar mensaje ",
       "credentials": {
         "postgres": {
           "id": "7oc7RqApG6OhhiFs",
           "name": "Postgres local"
         }
       }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "154acaca-9da2-45da-b1b8-51befef3ff2e",
+                    "leftValue": "={{ $json.state }}",
+                    "rightValue": "open",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Open"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.state }}",
+                    "rightValue": "close",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "1f4d29eb-2214-438a-83e7-48e1f4ae49c1"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Close"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1120,
+        1312
+      ],
+      "id": "d67d1363-15ca-414c-ab1b-0e6317937dd0",
+      "name": "Estado de conexion1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "5900f3a5-b126-4ee0-ab74-ed1c87423ab3",
+                    "leftValue": "={{ $json.event }}",
+                    "rightValue": "connection.update",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Conexion"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        704,
+        1632
+      ],
+      "id": "957ab29a-0b28-4a03-91cd-a86c0ba89411",
+      "name": "Enrutar evento1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "asesores",
+          "mode": "list",
+          "cachedResultName": "asesores"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "as_activo": false,
+            "as_num_whatsapp": "={{ $json.sender }}"
+          },
+          "matchingColumns": [
+            "as_num_whatsapp"
+          ],
+          "schema": [
+            {
+              "id": "as_id",
+              "displayName": "as_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "as_num_whatsapp",
+              "displayName": "as_num_whatsapp",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "as_nombre",
+              "displayName": "as_nombre",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "as_activo",
+              "displayName": "as_activo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1392,
+        1408
+      ],
+      "id": "18273fc4-6fa2-4479-92ee-5f177f0ae2ef",
+      "name": "Desconectar asesor1",
+      "credentials": {
+        "postgres": {
+          "id": "7oc7RqApG6OhhiFs",
+          "name": "Postgres local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "asesores",
+          "mode": "list",
+          "cachedResultName": "asesores"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "as_activo": true,
+            "as_num_whatsapp": "={{ $json.wauid }}"
+          },
+          "matchingColumns": [
+            "as_num_whatsapp"
+          ],
+          "schema": [
+            {
+              "id": "as_id",
+              "displayName": "as_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "as_num_whatsapp",
+              "displayName": "as_num_whatsapp",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "as_nombre",
+              "displayName": "as_nombre",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "as_activo",
+              "displayName": "as_activo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1392,
+        1168
+      ],
+      "id": "c3b4ec23-3a20-443c-bd8c-e9c70d7d6ca2",
+      "name": "Conectar asesor1",
+      "credentials": {
+        "postgres": {
+          "id": "7oc7RqApG6OhhiFs",
+          "name": "Postgres local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "asesores",
+          "mode": "list",
+          "cachedResultName": "asesores"
+        },
+        "where": {
+          "values": [
+            {
+              "column": "as_num_whatsapp",
+              "value": "={{ $('Mapeando mensaje1').item.json.client_number }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        976,
+        1648
+      ],
+      "id": "5e5fe6b0-f8af-40c5-9ba9-77f1a78909e6",
+      "name": "Cliente es asesor?",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "7oc7RqApG6OhhiFs",
+          "name": "Postgres local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a6410e2e-7c0b-4b1a-9aed-948c05a27d7d",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1216,
+        1648
+      ],
+      "id": "455ec8d6-7077-47d7-a889-bba709f55060",
+      "name": "¿Cliente no es asesor?"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1520,
+        1872
+      ],
+      "id": "0fa6a7a4-43b0-4df1-b50b-617fc1cf5206",
+      "name": "No registar mensajes entre asesores"
     }
   ],
   "pinData": {},
   "connections": {
-    "Webhook": {
+    "Webhook1": {
       "main": [
         [
           {
-            "node": "Mapeando mensaje",
+            "node": "Mapeando mensaje1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Mapeando mensaje": {
+    "Mapeando mensaje1": {
       "main": [
         [
           {
-            "node": "If",
+            "node": "Enrutar evento1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "¿Existe la conversacion?": {
+    "¿Existe la conversacion?1": {
       "main": [
         [
           {
-            "node": "Obtener datos del asesor 2",
+            "node": "Obtener datos del asesor ",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Obtener datos del asesor",
+            "node": "Obtener datos del asesor1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Filter": {
+    "Filter1": {
       "main": [
         [
           {
-            "node": "Buscar conversaciones",
+            "node": "Buscar conversaciones1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "fromMe?": {
+    "fromMe?1": {
       "main": [
         [
           {
-            "node": "Actualizar nombre del cliente",
+            "node": "Actualizar nombre del cliente1",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Registar mensaje",
+            "node": "Registar mensaje1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "from Me?": {
+    "from Me?1": {
       "main": [
         [
           {
-            "node": "Crear conversacion asesor",
+            "node": "Crear conversacion asesor1",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Crear conversacion cliente",
+            "node": "Crear conversacion cliente1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "If": {
+    "Buscar conversaciones1": {
       "main": [
         [
           {
-            "node": "Filter",
+            "node": "¿Existe la conversacion?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener datos del asesor1": {
+      "main": [
+        [
+          {
+            "node": "from Me?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener datos del asesor ": {
+      "main": [
+        [
+          {
+            "node": "fromMe?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar nombre del cliente1": {
+      "main": [
+        [
+          {
+            "node": "Registar mensaje1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear conversacion cliente1": {
+      "main": [
+        [
+          {
+            "node": "Registar mensaje ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear conversacion asesor1": {
+      "main": [
+        [
+          {
+            "node": "Registar mensaje ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estado de conexion1": {
+      "main": [
+        [
+          {
+            "node": "Conectar asesor1",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Notificar desconexion",
+            "node": "Desconectar asesor1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Buscar conversaciones": {
+    "Enrutar evento1": {
       "main": [
         [
           {
-            "node": "¿Existe la conversacion?",
+            "node": "Estado de conexion1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cliente es asesor?",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Obtener datos del asesor": {
+    "Desconectar asesor1": {
       "main": [
         [
           {
-            "node": "from Me?",
+            "node": "Notificar desconexion1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Obtener datos del asesor 2": {
+    "Cliente es asesor?": {
       "main": [
         [
           {
-            "node": "fromMe?",
+            "node": "¿Cliente no es asesor?",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Actualizar nombre del cliente": {
+    "¿Cliente no es asesor?": {
       "main": [
         [
           {
-            "node": "Registar mensaje",
+            "node": "Filter1",
             "type": "main",
             "index": 0
           }
-        ]
-      ]
-    },
-    "Crear conversacion cliente": {
-      "main": [
+        ],
         [
           {
-            "node": "Registar mensaje 2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Crear conversacion asesor": {
-      "main": [
-        [
-          {
-            "node": "Registar mensaje 2",
+            "node": "No registar mensajes entre asesores",
             "type": "main",
             "index": 0
           }
@@ -1744,7 +1492,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "ff26947b-afc3-4624-aafd-0756ae719fb2",
+  "versionId": "edbf3b5c-1ae8-4c49-b3dc-d336e93eea03",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "ac1a18f350e3dfeecd381ce820d4cd26d1637d10390598d4a153be282b88ce7a"
