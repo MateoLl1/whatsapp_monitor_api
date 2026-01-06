@@ -8,6 +8,7 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
+  // Comentario antes de la migracion de n8n a nest
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
