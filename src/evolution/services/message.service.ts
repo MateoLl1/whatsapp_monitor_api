@@ -57,7 +57,7 @@ export class MessageService {
         nombre_cliente: fromMe ? null : data.pushName ?? null,
         inicio: fecha,
         fin: fecha,
-        estado: 'activa',
+        estado: 'ACTIVA',
         asesor,
       });
       conversacion = await this.conversacionesRepo.save(conversacion);
