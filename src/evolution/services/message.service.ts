@@ -6,12 +6,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Conversacion } from '../../conversaciones/entities/conversacion.entity';
 import { Mensaje } from '../../mensajes/entities/mensaje.entity';
-
+import axios from 'axios';
+import { MinioService } from '../../files/minio.service';
 @Injectable()
 export class MessageService {
   private baseUrl = process.env.API_EVOLUTION_URL || 'http://localhost:8080';
   private apiKey = process.env.API_EVOLUTION_KEY;
-
+  
   constructor(
     private readonly http: HttpService,
     @InjectRepository(Asesor)
@@ -20,6 +21,7 @@ export class MessageService {
     private readonly conversacionesRepo: Repository<Conversacion>,
     @InjectRepository(Mensaje)
     private readonly mensajesRepo: Repository<Mensaje>,
+    private readonly minioService:MinioService
   ) {}
 
   async sendTextMessage(instanceName: string, number: string, text: string) {
@@ -36,17 +38,18 @@ export class MessageService {
   async handleMessageUpsert(payload: any) {
     const data = payload?.data;
     if (!data) return null;
+
     const fromMe = data.key?.fromMe;
     const clienteNumero = data.key?.remoteJid?.split('@')[0];
     const asesorNumero = payload?.sender?.split('@')[0];
-    const contenido = data.message?.conversation ?? '';
     const fecha = new Date(Number(data.messageTimestamp) * 1000);
+
     const asesor = await this.asesoresRepo.findOne({
       where: { numero_whatsapp: asesorNumero },
     });
-    if (!asesor) {
+    if (!asesor)
       throw new Error(`Asesor con número ${asesorNumero} no encontrado`);
-    }
+
     let conversacion = await this.conversacionesRepo.findOne({
       where: { cliente_numero: clienteNumero, asesor: { id: asesor.id } },
       relations: ['asesor'],
@@ -68,18 +71,53 @@ export class MessageService {
       }
       await this.conversacionesRepo.save(conversacion);
     }
-    const mensaje = this.mensajesRepo.create({
-      conversacion,
-      mensaje: contenido,
-      fecha,
-      fromMe,
-    });
-    await this.mensajesRepo.save(mensaje);
-    return {
-      tipo: 'mensaje',
-      cliente: clienteNumero,
-      asesor: asesorNumero,
-      contenido,
-    };
+
+    // 🔹 Procesar texto
+    if (data.message?.conversation) {
+      const contenido = data.message.conversation;
+      const mensaje = this.mensajesRepo.create({
+        conversacion,
+        mensaje: contenido,
+        fecha,
+        fromMe,
+      });
+      await this.mensajesRepo.save(mensaje);
+      return {
+        tipo: 'texto',
+        cliente: clienteNumero,
+        asesor: asesorNumero,
+        contenido,
+      };
+    }
+
+    // 🔹 Procesar audio
+    if (data.message?.audioMessage) {
+      const audio = data.message.audioMessage;
+      const response = await axios.get(audio.url, {
+        responseType: 'arraybuffer',
+      });
+      const buffer = Buffer.from(response.data);
+
+      const objectName = `${data.key.id}.ogg`;
+      await this.minioService.uploadFile(objectName, buffer);
+
+      const mensaje = this.mensajesRepo.create({
+        conversacion,
+        mensaje: '',
+        objeto: objectName,
+        fecha,
+        fromMe,
+      });
+      await this.mensajesRepo.save(mensaje);
+
+      return {
+        tipo: 'audio',
+        cliente: clienteNumero,
+        asesor: asesorNumero,
+        objeto: objectName,
+      };
+    }
+
+    return { tipo: 'ignorado' };
   }
 }

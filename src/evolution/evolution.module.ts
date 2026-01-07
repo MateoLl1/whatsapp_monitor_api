@@ -11,11 +11,12 @@ import { MessageService } from './services/message.service';
 import { WebhookService } from './services/webhook.service';
 import { Conversacion } from '../conversaciones/entities/conversacion.entity';
 import { Mensaje } from '../mensajes/entities/mensaje.entity';
+import { MinioService } from '../files/minio.service';
 
 @Module({
   imports: [HttpModule, TypeOrmModule.forFeature([Asesor,Conversacion,Mensaje])],
   controllers: [EvolutionController, WebhookController],
-  providers: [InstanceService, MessageService, WebhookService],
+  providers: [InstanceService, MessageService, WebhookService,MinioService],
   exports: [InstanceService, MessageService],
 })
 export class EvolutionModule {}

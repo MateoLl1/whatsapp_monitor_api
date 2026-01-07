@@ -9,6 +9,9 @@ export class Mensaje {
   @Column({ name: 'me_mensajes', type: 'text' })
   mensaje: string;
 
+  @Column({ name: 'me_objeto', type: 'varchar', length: 100, nullable: true})
+  objeto?: string;
+
   @Column({ name: 'me_fecha', type: 'timestamp' })
   fecha: Date;
 
