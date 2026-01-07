@@ -5,7 +5,7 @@ import { Mensaje } from './entities/mensaje.entity';
 import { CreateMensajeDto } from './dto/create-mensaje.dto';
 import { UpdateMensajeDto } from './dto/update-mensaje.dto';
 import { Conversacion } from '../conversaciones/entities/conversacion.entity';
-import { EvolutionService } from '../evolution/evolution.service';
+import { MessageService } from '../evolution/services/message.service';
 
 @Injectable()
 export class MensajesService {
@@ -14,7 +14,7 @@ export class MensajesService {
     private mensajesRepo: Repository<Mensaje>,
     @InjectRepository(Conversacion)
     private conversacionesRepo: Repository<Conversacion>,
-    private evolutionService: EvolutionService,
+    private messageService: MessageService,
   ) {}
 
   async create(dto: CreateMensajeDto) {
@@ -35,7 +35,7 @@ export class MensajesService {
     }
 
 
-    await this.evolutionService.sendTextMessage(
+    await this.messageService.sendTextMessage(
       instanceName,
       numeroCliente,
       dto.mensaje,

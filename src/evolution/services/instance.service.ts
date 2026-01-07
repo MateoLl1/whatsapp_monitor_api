@@ -1,12 +1,12 @@
+import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { Repository } from 'typeorm';
-import { Asesor } from '../asesores/entities/asesore.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Injectable } from '@nestjs/common';
+import { Asesor } from '../../asesores/entities/asesore.entity';
 
 @Injectable()
-export class EvolutionService {
+export class InstanceService {
   private baseUrl = process.env.API_EVOLUTION_URL || 'http://localhost:8080';
   private apiKey = process.env.API_EVOLUTION_KEY;
 
@@ -25,7 +25,7 @@ export class EvolutionService {
       alwaysOnline: false,
       readMessages: false,
       webhook: {
-        url: process.env.WEBHOOK_N8N_SEGUIMIENTO!,
+        url: process.env.WEBHOOK_NEST_EVOLUTION || 'http://host.docker.internal:3000/webhook/evolution',
         byEvents: false,
         base64: false,
         events: [
@@ -67,12 +67,9 @@ export class EvolutionService {
 
   async getConnectionState(instanceName: string) {
     const response = await firstValueFrom(
-      this.http.get(
-        `${this.baseUrl}/instance/connectionState/${instanceName}`,
-        {
-          headers: { apikey: this.apiKey },
-        },
-      ),
+      this.http.get(`${this.baseUrl}/instance/connectionState/${instanceName}`, {
+        headers: { apikey: this.apiKey },
+      }),
     );
     return response.data;
   }
@@ -102,7 +99,6 @@ export class EvolutionService {
         headers: { apikey: this.apiKey },
       }),
     );
-
     await this.asesorRepo.update({ nombre: instanceName }, { activo: false });
     return response.data;
   }
@@ -112,22 +108,6 @@ export class EvolutionService {
       this.http.get(`${this.baseUrl}/instance/connect/${instanceName}`, {
         headers: { apikey: this.apiKey },
       }),
-    );
-    return response.data;
-  }
-
-  async sendTextMessage(instanceName: string, number: string, text: string) {
-    const response = await firstValueFrom(
-      this.http.post(
-        `${this.baseUrl}/message/sendText/${instanceName}`,
-        {
-          number: `${number}`,
-          text,
-        },
-        {
-          headers: { apikey: this.apiKey },
-        },
-      ),
     );
     return response.data;
   }

@@ -3,9 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { Asesor } from './entities/asesore.entity';
 import { CreateAsesorDto } from './dto/create-asesor.dto';
-import { EvolutionService } from '../evolution/evolution.service';
 import { UpdateAsesorDto } from './dto/update-asesor.dto';
 import { Mensaje } from '../mensajes/entities/mensaje.entity';
+import { InstanceService } from '../evolution/services/instance.service';
 
 @Injectable()
 export class AsesoresService {
@@ -14,19 +14,19 @@ export class AsesoresService {
     private asesoresRepo: Repository<Asesor>,
     @InjectRepository(Mensaje)
     private mensajesRepo: Repository<Mensaje>,
-    private readonly evolutionService: EvolutionService,
+    private readonly instanceService: InstanceService,
   ) {}
 
   async create(dto: CreateAsesorDto) {
     const asesor = this.asesoresRepo.create(dto);
     const saved = await this.asesoresRepo.save(asesor);
-    await this.evolutionService.createInstance(saved.nombre);
+    await this.instanceService.createInstance(saved.nombre);
     return saved;
   }
 
   async findAll() {
     const asesores = await this.asesoresRepo.find();
-    const instances = await this.evolutionService.fetchInstances();
+    const instances = await this.instanceService.fetchInstances();
 
     return asesores.map((asesor) => {
       const instance = instances.find((i: any) => i.name === asesor.nombre);
@@ -49,7 +49,7 @@ export class AsesoresService {
   async remove(id: number) {
     const asesor = await this.findOne(id);
     if (asesor) {
-      await this.evolutionService.deleteInstance(asesor.nombre);
+      await this.instanceService.deleteInstance(asesor.nombre);
     }
     return this.asesoresRepo.delete(id);
   }
@@ -58,7 +58,7 @@ export class AsesoresService {
     if (!asesor) {
       throw new Error('Asesor no encontrado');
     }
-    return this.evolutionService.connectInstance(asesor.nombre);
+    return this.instanceService.connectInstance(asesor.nombre);
   }
 
   async getStats() {
