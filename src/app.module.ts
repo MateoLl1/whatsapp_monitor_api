@@ -7,6 +7,7 @@ import { AsesoresModule } from './asesores/asesores.module';
 import { ConversacionesModule } from './conversaciones/conversaciones.module';
 import { MensajesModule } from './mensajes/mensajes.module';
 import { EvolutionModule } from './evolution/evolution.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { EvolutionModule } from './evolution/evolution.module';
     ConversacionesModule,
     MensajesModule,
     EvolutionModule,
+    FilesModule
   ],
   controllers: [AppController],
   providers: [AppService],
