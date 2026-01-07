@@ -10,7 +10,6 @@ export class WebhookController {
     const resumen = await this.webhookService.processEvent(payload);
 
     if (!resumen) {
-      // 🚫 Evento ignorado
       return { status: 'ignored' };
     }
 
