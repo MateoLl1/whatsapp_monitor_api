@@ -7,19 +7,21 @@ export class WebhookController {
 
   @Post()
   async handleWebhook(@Body() payload: any) {
-    const resumen = await this.webhookService.processEvent(payload);
+    const resultado = await this.webhookService.processEvent(payload);
 
-    if (!resumen) {
+    if (!resultado) {
       return { status: 'ignored' };
     }
 
+    this.logEvento(payload.event, resultado);
+  }
+
+  private logEvento(evento: string, resumen: any) {
     console.log('\n==============================');
     console.log('🚀 Nuevo evento Evolution');
-    console.log('📌 Tipo:', payload?.event ?? 'desconocido');
+    console.log('📌 Tipo:', evento ?? 'desconocido');
     console.log('------------------------------');
     console.log('📩 Resumen:', JSON.stringify(resumen, null, 2));
     console.log('==============================\n');
-
-    return { status: 'ok' };
   }
 }
