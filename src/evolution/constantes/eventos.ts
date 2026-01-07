@@ -15,5 +15,6 @@ export const EVENTOS_IGNORADOS: string[] = [
   'messages.update',
   'messages.set',
   'labels.edit',
-  'presence.update'
+  'presence.update',
+  'logout.instance'
 ];
