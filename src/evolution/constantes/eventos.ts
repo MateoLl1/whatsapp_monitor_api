@@ -1,10 +1,10 @@
 export const EVENTOS_IMPORTANTES: string[] = [
   'qrcode.updated',
-  'messages.update',
   'remove.instance',
   'connection.update',
   'messages.upsert',
-  'logout.instance'
+  'logout.instance',
+  'send.message'
 ];
 
 export const EVENTOS_IGNORADOS: string[] = [
@@ -16,5 +16,7 @@ export const EVENTOS_IGNORADOS: string[] = [
   'messages.set',
   'labels.edit',
   'presence.update',
-  'logout.instance'
+  'logout.instance',
+  'contacts.update',
+  'chats.upsert'
 ];

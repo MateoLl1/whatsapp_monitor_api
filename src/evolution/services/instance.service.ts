@@ -25,7 +25,9 @@ export class InstanceService {
       alwaysOnline: false,
       readMessages: false,
       webhook: {
-        url: process.env.WEBHOOK_NEST_EVOLUTION || 'http://host.docker.internal:3000/webhook/evolution',
+        url:
+          process.env.WEBHOOK_NEST_EVOLUTION ||
+          'http://host.docker.internal:3000/webhook/evolution',
         byEvents: false,
         base64: false,
         events: [
@@ -55,7 +57,6 @@ export class InstanceService {
       },
     };
 
-
     const response = await firstValueFrom(
       this.http.post(`${this.baseUrl}/instance/create`, body, {
         headers: { apikey: this.apiKey },
@@ -68,9 +69,12 @@ export class InstanceService {
 
   async getConnectionState(instanceName: string) {
     const response = await firstValueFrom(
-      this.http.get(`${this.baseUrl}/instance/connectionState/${instanceName}`, {
-        headers: { apikey: this.apiKey },
-      }),
+      this.http.get(
+        `${this.baseUrl}/instance/connectionState/${instanceName}`,
+        {
+          headers: { apikey: this.apiKey },
+        },
+      ),
     );
     return response.data;
   }
@@ -111,5 +115,17 @@ export class InstanceService {
       }),
     );
     return response.data;
+  }
+
+  async handleConnectionUpdate(payload: any) {
+    const sender = payload?.sender;
+    if (!sender) return null;
+    const numero = sender.split('@')[0];
+    const state = payload?.data?.state;
+    await this.asesorRepo.update(
+      { numero_whatsapp: numero },
+      { activo: state === 'open' },
+    );
+    return { tipo: 'connection', numero, state };
   }
 }

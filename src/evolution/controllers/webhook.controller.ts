@@ -1,5 +1,6 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { WebhookService } from '../services/webhook.service';
+import { EVENTOS_IGNORADOS } from '../constantes/eventos';
 
 @Controller('webhook/evolution')
 export class WebhookController {
@@ -7,12 +8,18 @@ export class WebhookController {
 
   @Post()
   async handleWebhook(@Body() payload: any) {
+    if (!EVENTOS_IGNORADOS.includes(payload?.event)) {
+      const resumen = this.webhookService.resumirObjeto(payload);
+      this.logEvento(payload.event, resumen);
+    }
+
     const resultado = await this.webhookService.processEvent(payload);
 
     if (!resultado) {
       return { status: 'ignored' };
     }
-    this.logEvento(payload.event, resultado);
+
+    return { status: 'ok' };
   }
 
   private logEvento(evento: string, resumen: any) {
@@ -20,7 +27,7 @@ export class WebhookController {
     console.log('🚀 Nuevo evento Evolution');
     console.log('📌 Tipo:', evento ?? 'desconocido');
     console.log('------------------------------');
-    console.log('📩 Resumen:', JSON.stringify(resumen, null, 2));
+    console.log('📩 Payload:', JSON.stringify(resumen, null, 2));
     console.log('==============================\n');
   }
 }
