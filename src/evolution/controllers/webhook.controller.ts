@@ -12,7 +12,6 @@ export class WebhookController {
     if (!resultado) {
       return { status: 'ignored' };
     }
-
     this.logEvento(payload.event, resultado);
   }
 

@@ -9,9 +9,11 @@ import { WebhookController } from './controllers/webhook.controller';
 import { InstanceService } from './services/instance.service';
 import { MessageService } from './services/message.service';
 import { WebhookService } from './services/webhook.service';
+import { Conversacion } from '../conversaciones/entities/conversacion.entity';
+import { Mensaje } from '../mensajes/entities/mensaje.entity';
 
 @Module({
-  imports: [HttpModule, TypeOrmModule.forFeature([Asesor])],
+  imports: [HttpModule, TypeOrmModule.forFeature([Asesor,Conversacion,Mensaje])],
   controllers: [EvolutionController, WebhookController],
   providers: [InstanceService, MessageService, WebhookService],
   exports: [InstanceService, MessageService],
