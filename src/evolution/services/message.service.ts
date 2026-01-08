@@ -7,9 +7,8 @@ import { Repository } from 'typeorm';
 import { Conversacion } from '../../conversaciones/entities/conversacion.entity';
 import { Mensaje } from '../../mensajes/entities/mensaje.entity';
 import axios from 'axios';
-import * as fs from 'fs';
-import * as path from 'path';
 import crypto from 'crypto';
+import { MinioService } from '../../files/minio.service';
 
 @Injectable()
 export class MessageService {
@@ -24,6 +23,7 @@ export class MessageService {
     private readonly conversacionesRepo: Repository<Conversacion>,
     @InjectRepository(Mensaje)
     private readonly mensajesRepo: Repository<Mensaje>,
+    private readonly minioService: MinioService,
   ) {}
 
   async sendTextMessage(instanceName: string, number: string, text: string) {
@@ -124,9 +124,7 @@ export class MessageService {
       const mediaKey = Buffer.from(Object.values(audio.mediaKey));
       const buffer = await this.decryptMedia(audio.url, mediaKey, 'audio');
       const objectName = `${data.key.id}.ogg`;
-      const filePath = path.join(process.cwd(), 'downloads', objectName);
-      fs.mkdirSync(path.dirname(filePath), { recursive: true });
-      fs.writeFileSync(filePath, buffer);
+      await this.minioService.uploadFile(objectName, buffer);
       const mensaje = this.mensajesRepo.create({
         conversacion,
         mensaje: '',
@@ -140,7 +138,6 @@ export class MessageService {
         cliente: clienteNumero,
         asesor: asesorNumero,
         objeto: objectName,
-        ruta: filePath,
       };
     }
 
@@ -149,9 +146,7 @@ export class MessageService {
       const mediaKey = Buffer.from(Object.values(image.mediaKey));
       const buffer = await this.decryptMedia(image.url, mediaKey, 'image');
       const objectName = `${data.key.id}.jpg`;
-      const filePath = path.join(process.cwd(), 'downloads', objectName);
-      fs.mkdirSync(path.dirname(filePath), { recursive: true });
-      fs.writeFileSync(filePath, buffer);
+      await this.minioService.uploadFile(objectName, buffer);
       const mensaje = this.mensajesRepo.create({
         conversacion,
         mensaje: '',
@@ -165,7 +160,6 @@ export class MessageService {
         cliente: clienteNumero,
         asesor: asesorNumero,
         objeto: objectName,
-        ruta: filePath,
       };
     }
 
@@ -174,9 +168,7 @@ export class MessageService {
       const mediaKey = Buffer.from(Object.values(sticker.mediaKey));
       const buffer = await this.decryptMedia(sticker.url, mediaKey, 'sticker');
       const objectName = `${data.key.id}.webp`;
-      const filePath = path.join(process.cwd(), 'downloads', objectName);
-      fs.mkdirSync(path.dirname(filePath), { recursive: true });
-      fs.writeFileSync(filePath, buffer);
+      await this.minioService.uploadFile(objectName, buffer);
       const mensaje = this.mensajesRepo.create({
         conversacion,
         mensaje: '',
@@ -190,7 +182,6 @@ export class MessageService {
         cliente: clienteNumero,
         asesor: asesorNumero,
         objeto: objectName,
-        ruta: filePath,
       };
     }
 
