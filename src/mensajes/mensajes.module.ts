@@ -5,11 +5,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Mensaje } from './entities/mensaje.entity';
 import { Conversacion } from '../conversaciones/entities/conversacion.entity';
 import { EvolutionModule } from '../evolution/evolution.module';
+import { FilesModule } from '../files/files.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Mensaje,Conversacion]),
-    EvolutionModule
+    EvolutionModule,
+    FilesModule
   ],
   controllers: [MensajesController],
   providers: [MensajesService],
