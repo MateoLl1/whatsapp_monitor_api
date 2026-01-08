@@ -97,6 +97,7 @@ export class MensajesService {
           fromMe: m.fromMe,
           objeto: url,
           tipo,
+          conversacion: m.conversacion
         };
       }),
     );
