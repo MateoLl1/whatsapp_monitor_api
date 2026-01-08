@@ -45,11 +45,15 @@ export class MessageService {
     const encMedia = await axios.get(url, { responseType: 'arraybuffer' });
     let encBuffer = Buffer.from(encMedia.data);
     encBuffer = encBuffer.slice(0, encBuffer.length - 10);
-    const info = `WhatsApp ${
-      type.charAt(0).toUpperCase() + type.slice(1)
-    } Keys`;
+    const map = {
+      audio: 'WhatsApp Audio Keys',
+      image: 'WhatsApp Image Keys',
+      video: 'WhatsApp Video Keys',
+      sticker: 'WhatsApp Image Keys',
+    };
+    const info = map[type];
     const keyMaterial = Buffer.from(
-      crypto.hkdfSync('sha256', mediaKey, Buffer.alloc(0), info, 80),
+      crypto.hkdfSync('sha256', mediaKey, Buffer.alloc(32, 0), info, 80),
     );
     const iv = keyMaterial.slice(0, 16);
     const cipherKey = keyMaterial.slice(16, 48);
@@ -133,6 +137,31 @@ export class MessageService {
       await this.mensajesRepo.save(mensaje);
       return {
         tipo: 'audio',
+        cliente: clienteNumero,
+        asesor: asesorNumero,
+        objeto: objectName,
+        ruta: filePath,
+      };
+    }
+
+    if (data.message?.imageMessage) {
+      const image = data.message.imageMessage;
+      const mediaKey = Buffer.from(Object.values(image.mediaKey));
+      const buffer = await this.decryptMedia(image.url, mediaKey, 'image');
+      const objectName = `${data.key.id}.jpg`;
+      const filePath = path.join(process.cwd(), 'downloads', objectName);
+      fs.mkdirSync(path.dirname(filePath), { recursive: true });
+      fs.writeFileSync(filePath, buffer);
+      const mensaje = this.mensajesRepo.create({
+        conversacion,
+        mensaje: '',
+        objeto: objectName,
+        fecha,
+        fromMe,
+      });
+      await this.mensajesRepo.save(mensaje);
+      return {
+        tipo: 'imagen',
         cliente: clienteNumero,
         asesor: asesorNumero,
         objeto: objectName,
