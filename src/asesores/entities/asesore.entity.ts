@@ -12,8 +12,8 @@ export class Asesor {
   @Column({ name: 'as_activo', default: false })
   activo: boolean;
 
-  @Column({ name: 'as_num_whatsapp', length: 20 })
-  numero_whatsapp: string;
+  @Column({ name: 'as_num_whatsapp', length: 20, nullable: true })
+  numero_whatsapp?: string;
 
   @OneToMany(() => Conversacion, (conv) => conv.asesor)
   conversaciones: Conversacion[];

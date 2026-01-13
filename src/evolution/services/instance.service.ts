@@ -68,22 +68,24 @@ export class InstanceService {
   }
 
   async getConnectionState(instanceName: string) {
-  try {
-    const response = await firstValueFrom(
-      this.http.get(
-        `${this.baseUrl}/instance/connectionState/${instanceName}`,
-        { headers: { apikey: this.apiKey } },
-      ),
-    );
-    return response.data;
-  } catch (error: any) {
-    if (error.response) {
-      throw new HttpException(error.response.data, error.response.status);
+    try {
+      const response = await firstValueFrom(
+        this.http.get(
+          `${this.baseUrl}/instance/connectionState/${instanceName}`,
+          { headers: { apikey: this.apiKey } },
+        ),
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response) {
+        throw new HttpException(error.response.data, error.response.status);
+      }
+      throw new HttpException(
+        { message: 'Error de conexión con Evolution' },
+        500,
+      );
     }
-    throw new HttpException({ message: 'Error de conexión con Evolution' }, 500);
   }
-}
-
 
   async fetchInstances() {
     const response = await firstValueFrom(
@@ -128,9 +130,10 @@ export class InstanceService {
     if (!sender) return null;
     const numero = sender.split('@')[0];
     const state = payload?.data?.state;
+    const instanceName = payload?.instance;
     await this.asesorRepo.update(
-      { numero_whatsapp: numero },
-      { activo: state === 'open' },
+      { nombre: instanceName },
+      { numero_whatsapp: numero, activo: state === 'open' },
     );
     return { tipo: 'connection', numero, state };
   }

@@ -1,5 +1,5 @@
 export class CreateAsesorDto {
   nombre: string;
   activo: boolean;
-  numero_whatsapp: string; 
+  numero_whatsapp?: string; 
 }
