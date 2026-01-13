@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { Repository } from 'typeorm';
@@ -68,16 +68,22 @@ export class InstanceService {
   }
 
   async getConnectionState(instanceName: string) {
+  try {
     const response = await firstValueFrom(
       this.http.get(
         `${this.baseUrl}/instance/connectionState/${instanceName}`,
-        {
-          headers: { apikey: this.apiKey },
-        },
+        { headers: { apikey: this.apiKey } },
       ),
     );
     return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      throw new HttpException(error.response.data, error.response.status);
+    }
+    throw new HttpException({ message: 'Error de conexión con Evolution' }, 500);
   }
+}
+
 
   async fetchInstances() {
     const response = await firstValueFrom(
