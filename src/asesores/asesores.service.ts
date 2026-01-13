@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { Asesor } from './entities/asesore.entity';
@@ -61,11 +65,23 @@ export class AsesoresService {
     }
     return this.asesoresRepo.delete(id);
   }
-  async connect(id: number) {
-    const asesor = await this.findOne(id);
-    if (!asesor) {
-      throw new Error('Asesor no encontrado');
+
+  async connect(idOrNombre: string) {
+    let asesor;
+    const id = Number(idOrNombre);
+
+    if (!isNaN(id)) {
+      asesor = await this.findOne(id);
+    } else {
+      asesor = await this.asesoresRepo.findOne({
+        where: { nombre: idOrNombre },
+      });
     }
+
+    if (!asesor) {
+      throw new NotFoundException('Asesor no encontrado');
+    }
+
     return this.instanceService.connectInstance(asesor.nombre);
   }
 

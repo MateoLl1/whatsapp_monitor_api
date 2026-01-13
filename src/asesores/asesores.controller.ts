@@ -47,7 +47,7 @@ export class AsesoresController {
 
   @Get(':id/connect')
   connect(@Param('id') id: string) {
-    return this.asesoresService.connect(+id);
+    return this.asesoresService.connect(id);
   }
 
   
