@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { Asesor } from './entities/asesore.entity';
@@ -18,6 +18,14 @@ export class AsesoresService {
   ) {}
 
   async create(dto: CreateAsesorDto) {
+    const existente = await this.asesoresRepo.findOne({
+      where: { nombre: dto.nombre },
+    });
+    if (existente) {
+      throw new ConflictException(
+        `Ya existe un asesor con el nombre "${dto.nombre}"`,
+      );
+    }
     const asesor = this.asesoresRepo.create(dto);
     const saved = await this.asesoresRepo.save(asesor);
     await this.instanceService.createInstance(saved.nombre);
