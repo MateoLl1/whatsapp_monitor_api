@@ -6,16 +6,21 @@ import {
   TokenValidation,
 } from 'nest-keycloak-connect';
 import { APP_GUARD } from '@nestjs/core';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    KeycloakConnectModule.register({
-      authServerUrl: process.env.KEYCLOAK_AUTH_SERVER_URL || '',
-      realm: process.env.KEYCLOAK_REALM || '',
-      clientId: process.env.KEYCLOAK_CLIENT_ID || '',
-      secret: process.env.KEYCLOAK_CLIENT_SECRET || '',
-      policyEnforcement: PolicyEnforcementMode.PERMISSIVE,
-      tokenValidation: TokenValidation.ONLINE,
+    KeycloakConnectModule.registerAsync({
+      useFactory: (config: ConfigService) => ({
+        authServerUrl: config.get('KEYCLOAK_AUTH_SERVER_URL') || '',
+        realm: config.get('KEYCLOAK_REALM') || '',
+        clientId: config.get('KEYCLOAK_CLIENT_ID') || '',
+        secret: config.get('KEYCLOAK_CLIENT_SECRET') || '',
+        policyEnforcement: PolicyEnforcementMode.PERMISSIVE,
+        tokenValidation: TokenValidation.ONLINE,
+      }),
+      inject: [ConfigService],
+      imports: [ConfigModule],
     }),
   ],
   providers: [
