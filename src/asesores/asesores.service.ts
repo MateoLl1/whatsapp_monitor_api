@@ -25,11 +25,27 @@ export class AsesoresService {
     const existente = await this.asesoresRepo.findOne({
       where: { nombre: dto.nombre },
     });
+
     if (existente) {
-      throw new ConflictException(
-        `Ya existe un asesor con el nombre "${dto.nombre}"`,
-      );
+      // Verificar si la instancia Evolution existe
+      try {
+        await this.instanceService.getConnectionState(existente.nombre);
+        // Si no lanza error, la instancia sí existe → conflicto real
+        throw new ConflictException(
+          `Ya existe un asesor con el nombre "${dto.nombre}"`,
+        );
+      } catch (error: any) {
+        // Si el error es 404 → la instancia no existe, recrearla
+        if (error.status === 404) {
+          await this.instanceService.createInstance(existente.nombre);
+          return existente;
+        }
+        // Otros errores → propagar
+        throw error;
+      }
     }
+
+    // Caso normal: crear asesor nuevo
     const asesor = this.asesoresRepo.create(dto);
     const saved = await this.asesoresRepo.save(asesor);
     await this.instanceService.createInstance(saved.nombre);
