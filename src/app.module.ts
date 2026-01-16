@@ -8,6 +8,7 @@ import { ConversacionesModule } from './conversaciones/conversaciones.module';
 import { MensajesModule } from './mensajes/mensajes.module';
 import { EvolutionModule } from './evolution/evolution.module';
 import { FilesModule } from './files/files.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { FilesModule } from './files/files.module';
       autoLoadEntities: true,
       synchronize: true,
     }),
+    AuthModule,
     AsesoresModule,
     ConversacionesModule,
     MensajesModule,
