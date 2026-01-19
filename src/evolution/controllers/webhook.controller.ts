@@ -2,13 +2,14 @@ import { Controller, Post, Body } from '@nestjs/common';
 import { WebhookService } from '../services/webhook.service';
 import { EVENTOS_IGNORADOS } from '../constantes/eventos';
 import { Public } from '../../auth/decorators';
+import { Unprotected } from 'nest-keycloak-connect';
 
 @Controller('webhook/evolution')
 export class WebhookController {
   constructor(private readonly webhookService: WebhookService) {}
 
   @Post()
-  @Public() // Este endpoint debe ser público para recibir webhooks externos
+  @Unprotected()  
   async handleWebhook(@Body() payload: any) {
     if (!EVENTOS_IGNORADOS.includes(payload?.event)) {
       const resumen = this.webhookService.resumirObjeto(payload);
