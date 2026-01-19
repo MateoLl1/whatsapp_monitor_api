@@ -27,6 +27,7 @@
     "@nestjs/mapped-types": "2.0.2",
     "@nestjs/passport": "10.0.0",
     "@nestjs/platform-express": "10.4.22",
+    "@nestjs/serve-static": "^4.0.2",
     "@nestjs/typeorm": "10.0.0",
     "keycloak-connect": "^26.1.1",
     "minio": "^8.0.6",

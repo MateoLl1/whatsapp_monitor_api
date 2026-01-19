@@ -1,8 +1,12 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { Module, MiddlewareConsumer, NestModule, RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+
 import { AsesoresModule } from './asesores/asesores.module';
 import { ConversacionesModule } from './conversaciones/conversaciones.module';
 import { MensajesModule } from './mensajes/mensajes.module';
@@ -10,11 +14,12 @@ import { EvolutionModule } from './evolution/evolution.module';
 import { FilesModule } from './files/files.module';
 import { AuthModule } from './auth/auth.module';
 
+
+
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
+    ConfigModule.forRoot({ isGlobal: true }),
+
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
@@ -25,14 +30,21 @@ import { AuthModule } from './auth/auth.module';
       autoLoadEntities: true,
       synchronize: true,
     }),
+
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+      exclude: ['/api*'],
+      serveStaticOptions: { index: false },
+    }),
+
     AuthModule,
     AsesoresModule,
     ConversacionesModule,
     MensajesModule,
     EvolutionModule,
-    FilesModule
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule{}
