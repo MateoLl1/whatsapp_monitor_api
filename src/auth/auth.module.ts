@@ -8,8 +8,9 @@ import {
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
-import { AuthController } from './controllers/auth.controller';
+
 import { AuthService } from './services/auth.service';
+import { AuthController } from './controllers/auth.controller';
 
 
 @Module({
