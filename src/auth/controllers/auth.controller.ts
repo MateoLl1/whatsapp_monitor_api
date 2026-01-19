@@ -10,6 +10,7 @@ export class AuthController {
   @Public()
   @Post('token')
   async getToken() {
+    console.log('🔥 SE PIDIO UN TOKEN NUEVO');
     return this.authService.getServiceToken();
   }
 }
