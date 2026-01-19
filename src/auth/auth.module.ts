@@ -24,7 +24,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
   ],
   providers: [
-    // Guard global para autenticación
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
