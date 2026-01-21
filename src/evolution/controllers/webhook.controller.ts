@@ -1,7 +1,6 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { WebhookService } from '../services/webhook.service';
 import { EVENTOS_IGNORADOS } from '../constantes/eventos';
-import { Public } from '../../auth/decorators';
 import { Unprotected } from 'nest-keycloak-connect';
 
 @Controller('webhook/evolution')
