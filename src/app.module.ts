@@ -13,6 +13,7 @@ import { MensajesModule } from './mensajes/mensajes.module';
 import { EvolutionModule } from './evolution/evolution.module';
 import { FilesModule } from './files/files.module';
 import { AuthModule } from './auth/auth.module';
+import { SiacModule } from './siac/siac.module';
 
 
 
@@ -43,6 +44,7 @@ import { AuthModule } from './auth/auth.module';
     MensajesModule,
     EvolutionModule,
     FilesModule,
+    SiacModule
   ],
   controllers: [AppController],
   providers: [AppService],
