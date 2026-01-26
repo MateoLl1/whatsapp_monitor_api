@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Asesor } from '../asesores/entities/asesore.entity';
 import { Mensaje } from '../mensajes/entities/mensaje.entity';
 import { GetSiacMensajesDto } from './dto/get-siac-mensajes.dto';
+import { MinioService } from '../files/minio.service';
 
 @Injectable()
 export class SiacService {
@@ -12,6 +13,7 @@ export class SiacService {
     private readonly asesorRepo: Repository<Asesor>,
     @InjectRepository(Mensaje)
     private readonly mensajeRepo: Repository<Mensaje>,
+    private readonly minioService: MinioService,
   ) {}
 
   async obtenerMensajes(query: GetSiacMensajesDto) {
@@ -50,17 +52,33 @@ export class SiacService {
 
     const rows = await qb.getRawMany();
 
+    const objetosUnicos = Array.from(
+      new Set(rows.map((r) => r.objeto).filter((x) => !!x))
+    ) as string[];
+
+    const urls = await Promise.all(
+      objetosUnicos.map(async (name) => {
+        const url = await this.minioService.getFileUrl(name);
+        return [name, url] as const;
+      })
+    );
+
+    const urlMap = new Map<string, string>(urls);
+
     return {
       asesor_nombre: asesor.nombre,
       asesor_numero: asesor.numero_whatsapp ?? '',
       cliente_numero: query.cliente,
-      mensajes: rows.map((r) => ({
-        fecha: r.fecha,
-        mensaje: r.mensaje ?? '',
-        fromMe: !!r.fromme,
-        tipo_mensaje: r.objeto ? 'FILE' : 'TEXT',
-        adjunto_url: r.objeto ?? null,
-      })),
+      mensajes: rows.map((r) => {
+        const objeto = r.objeto ?? null;
+        return {
+          fecha: r.fecha,
+          mensaje: r.mensaje ?? '',
+          fromMe: !!r.fromme,
+          tipo_mensaje: objeto ? 'FILE' : 'TEXT',
+          adjunto_url: objeto ? urlMap.get(objeto) ?? null : null,
+        };
+      }),
     };
   }
 }
