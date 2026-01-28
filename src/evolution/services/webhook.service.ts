@@ -39,9 +39,17 @@ export class WebhookService {
       switch (payload?.event) {
         case 'connection.update':
           return this.connectionService.handleConnectionUpdate(payload);
+        
         case 'messages.upsert':
         case 'send.message':
+          // CONDICION QUE BLOQUE LOS STICKER DE WEB Y DESKTOP
+          if (payload?.data?.message?.stickerMessage?.url?.includes('web.whatsapp.net')) {
+            console.log('Sticker con URL de web.whatsapp.net ignorado');
+            return null; 
+          }
+          
           return this.messageService.handleMessageUpsert(payload);
+
         default:
           return payload;
       }
