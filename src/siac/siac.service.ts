@@ -52,15 +52,22 @@ export class SiacService {
 
     const rows = await qb.getRawMany();
 
+    const getNombreArchivo = (objeto: string) => {
+      const clean = (objeto ?? '').toString().trim();
+      if (!clean) return null;
+      const parts = clean.split('/').filter(Boolean);
+      return parts.length ? parts[parts.length - 1] : clean;
+    };
+
     const objetosUnicos = Array.from(
-      new Set(rows.map((r) => r.objeto).filter((x) => !!x))
+      new Set(rows.map((r) => r.objeto).filter((x) => !!x)),
     ) as string[];
 
     const urls = await Promise.all(
       objetosUnicos.map(async (name) => {
         const url = await this.minioService.getFileUrl(name);
         return [name, url] as const;
-      })
+      }),
     );
 
     const urlMap = new Map<string, string>(urls);
@@ -71,12 +78,17 @@ export class SiacService {
       cliente_numero: query.cliente,
       mensajes: rows.map((r) => {
         const objeto = r.objeto ?? null;
+        const isFile = !!objeto;
+
+        const adjuntoNombre = isFile ? getNombreArchivo(objeto) : null;
+
         return {
           fecha: r.fecha,
           mensaje: r.mensaje ?? '',
           fromMe: !!r.fromme,
-          tipo_mensaje: objeto ? 'FILE' : 'TEXT',
-          adjunto_url: objeto ? urlMap.get(objeto) ?? null : null,
+          tipo_mensaje: isFile ? 'FILE' : 'TEXT',
+          adjunto_nombre: adjuntoNombre, 
+          adjunto_url: isFile ? (urlMap.get(objeto) ?? null) : null,
         };
       }),
     };
