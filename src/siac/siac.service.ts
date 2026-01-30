@@ -5,6 +5,7 @@ import { Asesor } from '../asesores/entities/asesore.entity';
 import { Mensaje } from '../mensajes/entities/mensaje.entity';
 import { GetSiacMensajesDto } from './dto/get-siac-mensajes.dto';
 import { MinioService } from '../files/minio.service';
+import { TempLinksService } from '../media/services/temp-links.service';
 
 @Injectable()
 export class SiacService {
@@ -13,7 +14,7 @@ export class SiacService {
     private readonly asesorRepo: Repository<Asesor>,
     @InjectRepository(Mensaje)
     private readonly mensajeRepo: Repository<Mensaje>,
-    private readonly minioService: MinioService,
+    private tempLinksService: TempLinksService
   ) {}
 
   async obtenerMensajes(query: GetSiacMensajesDto) {
@@ -52,6 +53,15 @@ export class SiacService {
 
     const rows = await qb.getRawMany();
 
+    const origin = (process.env.PUBLIC_ORIGIN || '').replace(/\/$/, '');
+    if (!origin) throw new Error('PUBLIC_ORIGIN is required');
+
+    const port = process.env.APP_PORT || '3000';
+    const base =
+      origin === 'http://localhost' || origin === 'http://127.0.0.1'
+        ? `${origin}:${port}`
+        : origin;
+
     const getNombreArchivo = (objeto: string) => {
       const clean = (objeto ?? '').toString().trim();
       if (!clean) return null;
@@ -59,16 +69,15 @@ export class SiacService {
       return parts.length ? parts[parts.length - 1] : clean;
     };
 
-    const objetosUnicos = Array.from(
-      new Set(rows.map((r) => r.objeto).filter((x) => !!x)),
+    const nombresUnicos = Array.from(
+      new Set(rows.map((r) => getNombreArchivo(r.objeto)).filter((x) => !!x)),
     ) as string[];
 
-    const urls = await Promise.all(
-      objetosUnicos.map(async (name) => {
-        const url = await this.minioService.getFileUrl(name);
-        return [name, url] as const;
-      }),
-    );
+    const urls = nombresUnicos.map((name) => {
+      const token = this.tempLinksService.create(name, 300, false);
+      const url = `${base}/api/media/t/${token}`;
+      return [name, url] as const;
+    });
 
     const urlMap = new Map<string, string>(urls);
 
@@ -87,8 +96,11 @@ export class SiacService {
           mensaje: r.mensaje ?? '',
           fromMe: !!r.fromme,
           tipo_mensaje: isFile ? 'FILE' : 'TEXT',
-          adjunto_nombre: adjuntoNombre, 
-          adjunto_url: isFile ? (urlMap.get(objeto) ?? null) : null,
+          adjunto_nombre: adjuntoNombre,
+          adjunto_url:
+            isFile && adjuntoNombre
+              ? (urlMap.get(adjuntoNombre) ?? null)
+              : null,
         };
       }),
     };

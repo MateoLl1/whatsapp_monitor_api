@@ -17,7 +17,7 @@ export class MensajesService {
     @InjectRepository(Conversacion)
     private conversacionesRepo: Repository<Conversacion>,
     private messageService: MessageService,
-    private tempLinksService: TempLinksService
+    private tempLinksService: TempLinksService,
   ) {}
 
   async create(dto: CreateMensajeDto) {
@@ -71,9 +71,15 @@ export class MensajesService {
       relations: ['conversacion'],
     });
 
+    const origin = (process.env.PUBLIC_ORIGIN || '').replace(/\/$/, '');
+    if (!origin) throw new Error('PUBLIC_ORIGIN is required');
+
+    const port = process.env.APP_PORT || '3000';
+
     const base =
-      process.env.PUBLIC_ORIGIN ||
-      `http://localhost:${process.env.APP_PORT || 3000}`;
+      origin === 'http://localhost' || origin === 'http://127.0.0.1'
+        ? `${origin}:${port}`
+        : origin;
 
     return Promise.all(
       mensajes.map(async (m) => {
