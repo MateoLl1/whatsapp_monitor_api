@@ -1,0 +1,103 @@
+
+
+volumes:
+  postgres_data:
+  minio_data:
+  evolution_instances:
+
+services:
+  whatsapp-monitor-api:
+    image: whatsapp-monitor-api
+    container_name: whatsapp-monitor-api
+    ports:
+      - "3000:3000"
+    environment:
+      APP_PORT: 3000
+      NODE_ENV: production
+
+      FRONTEND_USER: admin
+      FRONTEND_PASS: 123456789
+
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASS: 123456789
+      DB_NAME: sg_whatsapp
+
+      API_EVOLUTION_URL: http://evolution-api:8080
+      API_EVOLUTION_KEY: ae47be328779c370275bf95e61c4feeB8
+      WEBHOOK_NEST_EVOLUTION: http://whatsapp-monitor-api:3000/api/webhook/evolution
+
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_USE_SSL: "false"
+      MINIO_ACCESS_KEY: admin
+      MINIO_SECRET_KEY: 123456789
+      MINIO_BUCKET: conversaciones
+
+      KEYCLOAK_AUTH_SERVER_URL: https://auth.autoconsa.com/auth
+      KEYCLOAK_REALM: AUTOCONSA
+      KEYCLOAK_CLIENT_ID: siac-api-client
+      KEYCLOAK_CLIENT_SECRET: 6VwfzFCs4TYlbjDSMkZHhEvFJTQh4dP0
+      KEYCLOAK_REALM_PUBLIC_KEY: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQE...
+
+    depends_on:
+      - postgres
+      - minio
+      - evolution-api
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456789
+      POSTGRES_DB: sg_whatsapp
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: 123456789
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    restart: unless-stopped
+
+  evolution-api:
+    image: evoapicloud/evolution-api:homolog
+    container_name: evolution-api
+    ports:
+      - "8080:8080"
+    environment:
+      AUTHENTICATION_API_KEY: ae47be328779c370275bf95e61c4feeB8
+
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgres://postgres:123456789@postgres:5432/evolution
+
+      CACHE_REDIS_ENABLED: "false"
+      CACHE_LOCAL_ENABLED: "true"
+
+      CONFIG_SESSION_PHONE_VERSION: 2.3000.1023204200
+      DEFAULT_INTEGRATION: WHATSAPP
+      ENABLE_WHATSAPP_BAILEYS: "true"
+      ENABLE_WHATSAPP_CLOUD: "false"
+
+      TYPEBOT_ENABLED: "true"
+      CHATWOOT_ENABLED: "false"
+
+      TZ: America/Guayaquil
+
+    volumes:
+      - evolution_instances:/evolution/instances
+    depends_on:
+      - postgres
+    restart: unless-stopped
