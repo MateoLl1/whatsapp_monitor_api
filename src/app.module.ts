@@ -14,6 +14,7 @@ import { EvolutionModule } from './evolution/evolution.module';
 import { FilesModule } from './files/files.module';
 import { AuthModule } from './auth/auth.module';
 import { SiacModule } from './siac/siac.module';
+import { MediaModule } from './media/media.module';
 
 
 
@@ -44,7 +45,8 @@ import { SiacModule } from './siac/siac.module';
     MensajesModule,
     EvolutionModule,
     FilesModule,
-    SiacModule
+    SiacModule,
+    MediaModule
   ],
   controllers: [AppController],
   providers: [AppService],

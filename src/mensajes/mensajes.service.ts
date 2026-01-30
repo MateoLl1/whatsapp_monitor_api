@@ -7,6 +7,7 @@ import { UpdateMensajeDto } from './dto/update-mensaje.dto';
 import { Conversacion } from '../conversaciones/entities/conversacion.entity';
 import { MessageService } from '../evolution/services/message.service';
 import { MinioService } from '../files/minio.service';
+import { TempLinksService } from '../media/services/temp-links.service';
 
 @Injectable()
 export class MensajesService {
@@ -16,7 +17,7 @@ export class MensajesService {
     @InjectRepository(Conversacion)
     private conversacionesRepo: Repository<Conversacion>,
     private messageService: MessageService,
-    private minioService: MinioService,
+    private tempLinksService: TempLinksService
   ) {}
 
   async create(dto: CreateMensajeDto) {
@@ -70,23 +71,32 @@ export class MensajesService {
       relations: ['conversacion'],
     });
 
+    const base =
+      process.env.PUBLIC_ORIGIN ||
+      `http://localhost:${process.env.APP_PORT || 3000}`;
+
     return Promise.all(
       mensajes.map(async (m) => {
         let url: string | null = null;
         let tipo: string | null = null;
 
         if (m.objeto) {
-          url = await this.minioService.getFileUrl(m.objeto);
+          const objectName = m.objeto.includes('/api/')
+            ? (m.objeto.split('/').pop() ?? m.objeto)
+            : m.objeto;
 
-          if (m.objeto.endsWith('.ogg')) tipo = 'audio';
+          const token = this.tempLinksService.create(objectName, 300, false);
+          url = `${base}/api/media/t/${token}`;
+
+          if (objectName.endsWith('.ogg')) tipo = 'audio';
           else if (
-            m.objeto.endsWith('.jpg') ||
-            m.objeto.endsWith('.jpeg') ||
-            m.objeto.endsWith('.png')
+            objectName.endsWith('.jpg') ||
+            objectName.endsWith('.jpeg') ||
+            objectName.endsWith('.png')
           )
             tipo = 'imagen';
-          else if (m.objeto.endsWith('.webp')) tipo = 'sticker';
-          else if (m.objeto.endsWith('.mp4')) tipo = 'video';
+          else if (objectName.endsWith('.webp')) tipo = 'sticker';
+          else if (objectName.endsWith('.mp4')) tipo = 'video';
           else tipo = 'archivo';
         }
 
@@ -97,7 +107,7 @@ export class MensajesService {
           fromMe: m.fromMe,
           objeto: url,
           tipo,
-          conversacion: m.conversacion
+          conversacion: m.conversacion,
         };
       }),
     );

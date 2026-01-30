@@ -63,6 +63,12 @@ docker compose up -d
 docker logs -f whatsapp-monitor-api
 ```
 
+Borrar todos los contenedores corriendo
+```
+docker compose down -v --remove-orphans
+```
+
+
 
 ## Publicar la imagen en Docker Hub
 Este proyecto utiliza una imagen Docker versionada para su despliegue.
