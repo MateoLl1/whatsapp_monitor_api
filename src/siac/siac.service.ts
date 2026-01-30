@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { Asesor } from '../asesores/entities/asesore.entity';
 import { Mensaje } from '../mensajes/entities/mensaje.entity';
 import { GetSiacMensajesDto } from './dto/get-siac-mensajes.dto';
-import { MinioService } from '../files/minio.service';
 import { TempLinksService } from '../media/services/temp-links.service';
 
 @Injectable()
