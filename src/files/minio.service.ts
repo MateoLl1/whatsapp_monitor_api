@@ -46,7 +46,7 @@ export class MinioService implements OnModuleInit {
 
     return {
       objectName,
-      url: `${this.publicBaseUrl}/files/${objectName}`,
+      url: this.getFileUrl(objectName),
     };
   }
 
@@ -54,7 +54,7 @@ export class MinioService implements OnModuleInit {
     return this.client.getObject(this.bucket, objectName);
   }
 
-  getPublicFileUrl(objectName: string) {
-    return `${this.publicBaseUrl}/files/${objectName}`;
+  async getFileUrl(objectName: string): Promise<string> {
+    return `${this.publicBaseUrl}/api/files/${objectName}`;
   }
 }
