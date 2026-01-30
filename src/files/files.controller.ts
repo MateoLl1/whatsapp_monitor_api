@@ -1,6 +1,8 @@
-import { Controller, Post, Get, UploadedFile, UseInterceptors, Param } from '@nestjs/common';
+import { Controller, Post, Get, UploadedFile, UseInterceptors, Param, Res } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MinioService } from './minio.service';
+import type { Response } from 'express';
+
 
 @Controller('files')
 export class FilesController {
@@ -13,7 +15,8 @@ export class FilesController {
   }
 
   @Get(':name')
-  async getFile(@Param('name') name: string) {
-    return this.minioService.getFileUrl(name);
+  async getFile(@Param('name') name: string, @Res() res: Response) {
+    const stream = await this.minioService.getObject(name);
+    stream.pipe(res);
   }
 }

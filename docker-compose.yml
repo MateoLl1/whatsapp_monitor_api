@@ -28,6 +28,9 @@ services:
       API_EVOLUTION_KEY: ae47be328779c370275bf95e61c4feeB8
       WEBHOOK_NEST_EVOLUTION: http://whatsapp-monitor-api:3000/api/webhook/evolution
 
+      # API PUBLIC BASE (PARA ARCHIVOS)
+      API_PUBLIC_BASE_URL: http://localhost:3000
+
       MINIO_ENDPOINT: minio
       MINIO_PORT: 9000
       MINIO_USE_SSL: "false"
