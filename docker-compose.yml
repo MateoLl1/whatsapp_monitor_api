@@ -14,7 +14,9 @@ services:
     environment:
       APP_PORT: 3000
       NODE_ENV: production
-      PUBLIC_ORIGIN: https://tu-dominio.com
+      
+      PUBLIC_ORIGIN: http://localhost:3000
+
 
       FRONTEND_USER: admin
       FRONTEND_PASS: 123456789
