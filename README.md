@@ -17,6 +17,8 @@ Backend desarrollado en NestJS que sirve una aplicación Angular embebida y gest
 - Contenedores: Docker y Docker Compose
 
 
+
+
 ## Flujo de Desarrollo (Local)
 1. Instalar dependencias
 ```
@@ -32,6 +34,24 @@ Backend desarrollado en NestJS que sirve una aplicación Angular embebida y gest
 ```
 4. Acceder a la aplicación
     http://localhost:3000 <- Si ese es tu puerto
+
+
+## 💽 Correr migraciones de Base de datos
+
+1. Crear el build del proyecto (Opcional)
+```
+rmdir /s /q dist
+```
+2. Crear el build del proyecto
+```
+npm run build
+```
+3. Compilar el proyecto
+```
+npx typeorm migration:run -d dist/data-source.js
+```
+
+
 
 
 ## Flujo Docker (Producción / Local)
