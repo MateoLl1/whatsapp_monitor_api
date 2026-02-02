@@ -6,7 +6,6 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --legacy-peer-deps
 
-
 COPY tsconfig*.json ./
 COPY nest-cli.json ./
 COPY src ./src
@@ -28,4 +27,4 @@ COPY package.json ./
 
 EXPOSE 3000
 
-CMD ["node", "dist/main.js"]
+CMD ["sh", "-c", "npx typeorm migration:run -d dist/data-source.js && node dist/main.js"]

@@ -16,7 +16,6 @@ services:
       NODE_ENV: production
       PUBLIC_ORIGIN: https://tu-dominio.com
 
-
       FRONTEND_USER: admin
       FRONTEND_PASS: 123456789
 
@@ -44,9 +43,13 @@ services:
       KEYCLOAK_REALM_PUBLIC_KEY: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQE...
 
     depends_on:
-      - postgres
-      - minio
-      - evolution-api
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+      evolution-api:
+        condition: service_started
+
     restart: unless-stopped
 
   postgres:
@@ -58,6 +61,11 @@ services:
       POSTGRES_DB: sg_whatsapp
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
   minio:
@@ -97,9 +105,9 @@ services:
       CHATWOOT_ENABLED: "false"
 
       TZ: America/Guayaquil
-
     volumes:
       - evolution_instances:/evolution/instances
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
