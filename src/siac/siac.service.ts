@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { Asesor } from '../asesores/entities/asesore.entity';
 import { Mensaje } from '../mensajes/entities/mensaje.entity';
 import { GetSiacMensajesDto } from './dto/get-siac-mensajes.dto';
-import { TempLinksService } from '../media/services/temp-links.service';
+import { MediaUrlService } from '../media/services/media-url.service';
 
 @Injectable()
 export class SiacService {
@@ -13,7 +13,7 @@ export class SiacService {
     private readonly asesorRepo: Repository<Asesor>,
     @InjectRepository(Mensaje)
     private readonly mensajeRepo: Repository<Mensaje>,
-    private tempLinksService: TempLinksService
+    private readonly mediaUrl: MediaUrlService,
   ) {}
 
   async obtenerMensajes(query: GetSiacMensajesDto) {
@@ -52,29 +52,14 @@ export class SiacService {
 
     const rows = await qb.getRawMany();
 
-    const origin = (process.env.PUBLIC_ORIGIN || '').replace(/\/$/, '');
-    if (!origin) throw new Error('PUBLIC_ORIGIN is required');
-
-    const port = process.env.APP_PORT || '3000';
-    const base =
-      origin === 'http://localhost' || origin === 'http://127.0.0.1'
-        ? `${origin}:${port}`
-        : origin;
-
-    const getNombreArchivo = (objeto: string) => {
-      const clean = (objeto ?? '').toString().trim();
-      if (!clean) return null;
-      const parts = clean.split('/').filter(Boolean);
-      return parts.length ? parts[parts.length - 1] : clean;
-    };
+    const getNombreArchivo = (objeto: string) => this.mediaUrl.objectNameFrom(objeto);
 
     const nombresUnicos = Array.from(
       new Set(rows.map((r) => getNombreArchivo(r.objeto)).filter((x) => !!x)),
     ) as string[];
 
     const urls = nombresUnicos.map((name) => {
-      const token = this.tempLinksService.create(name, 300, false);
-      const url = `${base}/api/media/t/${token}`;
+      const url = this.mediaUrl.tempUrlForObjectName(name, false);
       return [name, url] as const;
     });
 
@@ -97,9 +82,7 @@ export class SiacService {
           tipo_mensaje: isFile ? 'FILE' : 'TEXT',
           adjunto_nombre: adjuntoNombre,
           adjunto_url:
-            isFile && adjuntoNombre
-              ? (urlMap.get(adjuntoNombre) ?? null)
-              : null,
+            isFile && adjuntoNombre ? (urlMap.get(adjuntoNombre) ?? null) : null,
         };
       }),
     };

@@ -6,8 +6,7 @@ import { CreateMensajeDto } from './dto/create-mensaje.dto';
 import { UpdateMensajeDto } from './dto/update-mensaje.dto';
 import { Conversacion } from '../conversaciones/entities/conversacion.entity';
 import { MessageService } from '../evolution/services/message.service';
-import { MinioService } from '../files/minio.service';
-import { TempLinksService } from '../media/services/temp-links.service';
+import { MediaUrlService } from '../media/services/media-url.service';
 
 @Injectable()
 export class MensajesService {
@@ -17,7 +16,7 @@ export class MensajesService {
     @InjectRepository(Conversacion)
     private conversacionesRepo: Repository<Conversacion>,
     private messageService: MessageService,
-    private tempLinksService: TempLinksService,
+    private readonly mediaUrl: MediaUrlService,
   ) {}
 
   async create(dto: CreateMensajeDto) {
@@ -71,39 +70,17 @@ export class MensajesService {
       relations: ['conversacion'],
     });
 
-    const origin = (process.env.PUBLIC_ORIGIN || '').replace(/\/$/, '');
-    if (!origin) throw new Error('PUBLIC_ORIGIN is required');
-
-    const port = process.env.APP_PORT || '3000';
-
-    const base =
-      origin === 'http://localhost' || origin === 'http://127.0.0.1'
-        ? `${origin}:${port}`
-        : origin;
-
     return Promise.all(
       mensajes.map(async (m) => {
         let url: string | null = null;
         let tipo: string | null = null;
 
         if (m.objeto) {
-          const objectName = m.objeto.includes('/api/')
-            ? (m.objeto.split('/').pop() ?? m.objeto)
-            : m.objeto;
-
-          const token = this.tempLinksService.create(objectName, 300, false);
-          url = `${base}/api/media/t/${token}`;
-
-          if (objectName.endsWith('.ogg')) tipo = 'audio';
-          else if (
-            objectName.endsWith('.jpg') ||
-            objectName.endsWith('.jpeg') ||
-            objectName.endsWith('.png')
-          )
-            tipo = 'imagen';
-          else if (objectName.endsWith('.webp')) tipo = 'sticker';
-          else if (objectName.endsWith('.mp4')) tipo = 'video';
-          else tipo = 'archivo';
+          const objectName = this.mediaUrl.objectNameFrom(m.objeto);
+          if (objectName) {
+            url = this.mediaUrl.tempUrlForObjectName(objectName, false);
+            tipo = this.mediaUrl.mediaTypeFromObjectName(objectName);
+          }
         }
 
         return {
