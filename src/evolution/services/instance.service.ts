@@ -72,10 +72,20 @@ export class InstanceService {
       const response = await firstValueFrom(
         this.http.get(
           `${this.baseUrl}/instance/connectionState/${instanceName}`,
-          { headers: { apikey: this.apiKey } },
+          {
+            headers: { apikey: this.apiKey },
+          },
         ),
       );
-      return response.data;
+
+      const asesor = await this.asesorRepo.findOne({
+        where: { nombre: instanceName },
+      });
+
+      return {
+        ...response.data,
+        numero_whatsapp: asesor?.numero_whatsapp || null,
+      };
     } catch (error: any) {
       if (error.response) {
         throw new HttpException(error.response.data, error.response.status);
