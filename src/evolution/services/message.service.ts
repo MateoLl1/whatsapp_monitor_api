@@ -74,9 +74,12 @@ export class MessageService {
     const asesorNumero = payload?.sender?.split('@')[0];
     const fecha = new Date(Number(data.messageTimestamp) * 1000);
 
+    const instanceName = payload?.instance;
+
     const asesor = await this.asesoresRepo.findOne({
-      where: { numero_whatsapp: asesorNumero },
+      where: { nombre: instanceName },
     });
+
     if (!asesor)
       throw new Error(`Asesor con número ${asesorNumero} no encontrado`);
 
@@ -87,7 +90,7 @@ export class MessageService {
     if (!conversacion) {
       conversacion = this.conversacionesRepo.create({
         cliente_numero: clienteNumero,
-        nombre_cliente: fromMe ? null : data.pushName ?? null,
+        nombre_cliente: fromMe ? null : (data.pushName ?? null),
         inicio: fecha,
         fin: fecha,
         estado: 'ACTIVA',
