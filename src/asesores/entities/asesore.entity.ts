@@ -15,6 +15,9 @@ export class Asesor {
   @Column({ name: 'as_num_whatsapp', length: 20, nullable: true })
   numero_whatsapp?: string;
 
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  as_ruc_tecnico?: string;
+
   @OneToMany(() => Conversacion, (conv) => conv.asesor)
   conversaciones: Conversacion[];
 }

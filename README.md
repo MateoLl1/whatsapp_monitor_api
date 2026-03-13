@@ -112,3 +112,25 @@ docker images
 ```
 docker push tuusuario/whatsapp-monitor-api:1.0.0
 ```
+
+
+## Base de datos (Actualizacion)
+Todo lo que sea actualizar la base de datos
+1. Borrar build anterior
+```
+rmdir /s /q dist
+```
+
+2. Compilar el proyecto
+```
+npm run build
+```
+3. Generar la migracion usando `dist`
+```
+npx typeorm migration:generate dist/migrations/AddRucTecnicoToAsesores -d dist/data-source.js
+```
+
+1. Ejecutar la migracion
+```
+npx typeorm migration:run -d dist/data-source.js
+```
