@@ -26,8 +26,13 @@ export class AsesoresController {
   }
 
   @Get('/stats')
-  getStats(){
+  getStats() {
     return this.asesoresService.getStats();
+  }
+
+  @Post('/filter')
+  filter(@Body() body: { numeros?: string[]; rucs?: string[] }) {
+    return this.asesoresService.findByNumeroOrRuc(body.numeros, body.rucs);
   }
 
   @Get(':id')
@@ -49,6 +54,4 @@ export class AsesoresController {
   connect(@Param('id') id: string) {
     return this.asesoresService.connect(id);
   }
-
-  
 }

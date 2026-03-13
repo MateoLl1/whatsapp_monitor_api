@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Repository } from 'typeorm';
+import { Between, In, Repository } from 'typeorm';
 import { Asesor } from './entities/asesore.entity';
 import { CreateAsesorDto } from './dto/create-asesor.dto';
 import { UpdateAsesorDto } from './dto/update-asesor.dto';
@@ -45,6 +45,22 @@ export class AsesoresService {
     const saved = await this.asesoresRepo.save(asesor);
     await this.instanceService.createInstance(saved.nombre);
     return saved;
+  }
+
+  async findByNumeroOrRuc(numeros?: string[], rucs?: string[]) {
+    const where: any[] = [];
+
+    if (numeros && numeros.length > 0) {
+      where.push({ numero_whatsapp: In(numeros) });
+    }
+
+    if (rucs && rucs.length > 0) {
+      where.push({ as_ruc_tecnico: In(rucs) });
+    }
+
+    return this.asesoresRepo.find({
+      where,
+    });
   }
 
   async findAll() {
