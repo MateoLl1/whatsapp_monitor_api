@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ConversacionesService } from './conversaciones.service';
 import { UpdateConversacioneDto } from './dto/update-conversacion.dto';
 import { CreateConversacionDto } from './dto/create-conversacion.dto';
@@ -12,9 +12,12 @@ export class ConversacionesController {
     return this.conversacionesService.create(createConversacioneDto);
   }
 
-  @Get()
-  findAll() {
-    return this.conversacionesService.findAll();
+   @Get()
+  findAll(
+    @Query('nombre') nombre?: string,
+    @Query('numero') numero?: string,
+  ) {
+    return this.conversacionesService.findAll(nombre, numero);
   }
 
   @Get(':id')

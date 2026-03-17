@@ -55,7 +55,7 @@ export class AsesoresService {
     }
 
     if (rucs && rucs.length > 0) {
-      where.push({ as_ruc_tecnico: In(rucs) });
+      where.push({ ruc_tecnico: In(rucs) });
     }
 
     return this.asesoresRepo.find({

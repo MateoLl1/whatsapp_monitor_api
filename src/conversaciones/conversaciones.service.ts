@@ -31,8 +31,24 @@ export class ConversacionesService {
     return this.conversacionesRepo.save(conversacion);
   }
 
-  findAll() {
-    return this.conversacionesRepo.find({ relations: ['asesor'] });
+  async findAll(nombre?: string, numero?: string) {
+    const qb = this.conversacionesRepo
+      .createQueryBuilder('conversacion')
+      .leftJoinAndSelect('conversacion.asesor', 'asesor');
+
+    if (nombre) {
+      qb.andWhere('LOWER(asesor.nombre) LIKE LOWER(:nombre)', {
+        nombre: `%${nombre}%`,
+      });
+    }
+
+    if (numero) {
+      qb.andWhere('conversacion.cliente_numero LIKE :numero', {
+        numero: `%${numero}%`,
+      });
+    }
+
+    return qb.orderBy('conversacion.inicio', 'DESC').getMany();
   }
 
   findOne(id: number) {
