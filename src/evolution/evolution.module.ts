@@ -12,10 +12,11 @@ import { WebhookService } from './services/webhook.service';
 import { Conversacion } from '../conversaciones/entities/conversacion.entity';
 import { Mensaje } from '../mensajes/entities/mensaje.entity';
 import { MinioService } from '../files/minio.service';
+import { AsesorConexionesModule } from '../asesor-conexiones/asesor-conexiones.module';
 
 @Module({
-  imports: [HttpModule, TypeOrmModule.forFeature([Asesor,Conversacion,Mensaje])],
-  controllers: [EvolutionController, WebhookController],
+  imports: [HttpModule, TypeOrmModule.forFeature([Asesor,Conversacion,Mensaje]), AsesorConexionesModule],
+  controllers: [EvolutionController, WebhookController, ],
   providers: [InstanceService, MessageService, WebhookService,MinioService],
   exports: [InstanceService, MessageService],
 })

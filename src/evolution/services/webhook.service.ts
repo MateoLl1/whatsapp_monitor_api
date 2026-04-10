@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { EVENTOS_IGNORADOS, EVENTOS_IMPORTANTES } from '../constantes/eventos';
 import { MessageService } from './message.service';
 import { InstanceService } from './instance.service';
+import { AsesorConexionesService } from '../../asesor-conexiones/asesor-conexiones.service';
 
 @Injectable()
 export class WebhookService {
   constructor(
     private readonly connectionService: InstanceService,
     private readonly messageService: MessageService,
+    private readonly asesorConexionesService: AsesorConexionesService,
   ) {}
 
   resumirObjeto(obj: any, maxLen = 200): any {
@@ -35,19 +37,22 @@ export class WebhookService {
       return null;
     }
 
+    if (payload?.event === 'connection.update' || payload?.event === 'qrcode.updated' || payload?.event === 'remove.instance') {
+      await this.asesorConexionesService.registrarDesdeWebhook(payload);
+    }
+
     if (EVENTOS_IMPORTANTES.includes(payload?.event)) {
       switch (payload?.event) {
         case 'connection.update':
           return this.connectionService.handleConnectionUpdate(payload);
-        
+
         case 'messages.upsert':
         case 'send.message':
-          // CONDICION QUE BLOQUE LOS STICKER DE WEB Y DESKTOP
           if (payload?.data?.message?.stickerMessage?.url?.includes('web.whatsapp.net')) {
             console.log('Sticker con URL de web.whatsapp.net ignorado');
-            return null; 
+            return null;
           }
-          
+
           return this.messageService.handleMessageUpsert(payload);
 
         default:
