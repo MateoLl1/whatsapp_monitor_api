@@ -34,7 +34,6 @@ export class AsesorConexionesService {
       evento: payload.event,
       estado,
       fecha: payload.date_time ? new Date(payload.date_time) : new Date(),
-      status_reason: payload.data?.statusReason ?? null,
       asesor,
     });
 

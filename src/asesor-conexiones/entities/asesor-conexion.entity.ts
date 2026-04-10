@@ -15,9 +15,6 @@ export class AsesorConexion {
   @Column({ name: 'ac_fecha', type: 'timestamp' })
   fecha: Date;
 
-  @Column({ name: 'ac_status_reason', type: 'int', nullable: true })
-  status_reason: number | null;
-
   @ManyToOne(() => Asesor, { nullable: false })
   @JoinColumn({ name: 'ac_asesor_id' })
   asesor: Asesor;
