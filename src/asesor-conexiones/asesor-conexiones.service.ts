@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { AsesorConexion } from './entities/asesor-conexion.entity';
 import { EvolutionWebhookDto } from '../evolution/dto/evolution-webhook.dto';
 import { Asesor } from '../asesores/entities/asesore.entity';
@@ -33,7 +33,9 @@ export class AsesorConexionesService {
     const registro = this.asesorConexionesRepository.create({
       evento: payload.event,
       estado,
-      fecha: payload.date_time ? new Date(payload.date_time) : new Date(),
+      fecha: payload.date_time
+        ? this.parsearTimestampSinTimezone(payload.date_time)
+        : new Date(),
       asesor,
     });
 
@@ -45,10 +47,18 @@ export class AsesorConexionesService {
 
     const [total, open, close, qrcode, removed] = await Promise.all([
       this.asesorConexionesRepository.count({ where }),
-      this.asesorConexionesRepository.count({ where: { ...where, estado: 'open' } }),
-      this.asesorConexionesRepository.count({ where: { ...where, estado: 'close' } }),
-      this.asesorConexionesRepository.count({ where: { ...where, estado: 'qrcode' } }),
-      this.asesorConexionesRepository.count({ where: { ...where, estado: 'removed' } }),
+      this.asesorConexionesRepository.count({
+        where: { ...where, estado: 'open' },
+      }),
+      this.asesorConexionesRepository.count({
+        where: { ...where, estado: 'close' },
+      }),
+      this.asesorConexionesRepository.count({
+        where: { ...where, estado: 'qrcode' },
+      }),
+      this.asesorConexionesRepository.count({
+        where: { ...where, estado: 'removed' },
+      }),
     ]);
 
     return {
@@ -84,7 +94,7 @@ export class AsesorConexionesService {
           total_removed: 0,
           ultima_conexion: null,
           ultima_desconexion: null,
-          ultima_actividad: item.fecha,
+          ultima_actividad: this.formatearFecha(item.fecha),
           estado_actual: item.estado,
         });
       }
@@ -94,14 +104,14 @@ export class AsesorConexionesService {
       if (item.estado === 'open') {
         actual.total_open += 1;
         if (!actual.ultima_conexion) {
-          actual.ultima_conexion = item.fecha;
+          actual.ultima_conexion = this.formatearFecha(item.fecha);
         }
       }
 
       if (item.estado === 'close') {
         actual.total_close += 1;
         if (!actual.ultima_desconexion) {
-          actual.ultima_desconexion = item.fecha;
+          actual.ultima_desconexion = this.formatearFecha(item.fecha);
         }
       }
 
@@ -136,7 +146,7 @@ export class AsesorConexionesService {
           asesor_nombre: item.asesor.nombre,
           ultimo_evento: item.evento,
           estado_actual: item.estado,
-          fecha: item.fecha,
+          fecha: this.formatearFecha(item.fecha),
         });
       }
     }
@@ -146,13 +156,20 @@ export class AsesorConexionesService {
     );
   }
 
-  async obtenerTimelinePorAsesor(asesorId: number, fechaInicio?: string, fechaFin?: string) {
+  async obtenerTimelinePorAsesor(
+    asesorId: number,
+    fechaInicio?: string,
+    fechaFin?: string,
+  ) {
     const where: any = {
       asesor: { id: asesorId },
     };
 
     if (fechaInicio && fechaFin) {
-      where.fecha = Between(new Date(fechaInicio), new Date(fechaFin));
+      where.fecha = Between(
+        this.parsearFechaFiltroInicio(fechaInicio),
+        this.parsearFechaFiltroFin(fechaFin),
+      );
     }
 
     const registros = await this.asesorConexionesRepository.find({
@@ -167,14 +184,17 @@ export class AsesorConexionesService {
       asesor_nombre: item.asesor.nombre,
       evento: item.evento,
       estado: item.estado,
-      fecha: item.fecha,
+      fecha: this.formatearFecha(item.fecha),
     }));
   }
 
   private construirWhereFechas(fechaInicio?: string, fechaFin?: string) {
     if (fechaInicio && fechaFin) {
       return {
-        fecha: Between(new Date(fechaInicio), new Date(fechaFin)),
+        fecha: Between(
+          this.parsearFechaFiltroInicio(fechaInicio),
+          this.parsearFechaFiltroFin(fechaFin),
+        ),
       };
     }
 
@@ -205,5 +225,60 @@ export class AsesorConexionesService {
     }
 
     return null;
+  }
+
+  private formatearFecha(fecha: Date): string {
+    const yyyy = fecha.getFullYear();
+    const mm = String(fecha.getMonth() + 1).padStart(2, '0');
+    const dd = String(fecha.getDate()).padStart(2, '0');
+    const hh = String(fecha.getHours()).padStart(2, '0');
+    const mi = String(fecha.getMinutes()).padStart(2, '0');
+    const ss = String(fecha.getSeconds()).padStart(2, '0');
+
+    return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
+  }
+
+  private parsearTimestampSinTimezone(valor: string): Date {
+    const limpio = valor.trim().replace('T', ' ').replace('Z', '');
+    const [fechaParte, horaParte] = limpio.split(' ');
+
+    if (!fechaParte || !horaParte) {
+      return new Date(valor);
+    }
+
+    const [anio, mes, dia] = fechaParte.split('-').map(Number);
+    const [hora, minuto, segundoConMs] = horaParte.split(':');
+
+    if (!anio || !mes || !dia || hora === undefined || minuto === undefined || segundoConMs === undefined) {
+      return new Date(valor);
+    }
+
+    const [segundo, milisegundo = '0'] = segundoConMs.split('.');
+
+    return new Date(
+      anio,
+      mes - 1,
+      dia,
+      Number(hora),
+      Number(minuto),
+      Number(segundo),
+      Number(milisegundo),
+    );
+  }
+
+  private parsearFechaFiltroInicio(valor: string): Date {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(valor.trim())) {
+      return this.parsearTimestampSinTimezone(`${valor.trim()}T00:00:00`);
+    }
+
+    return this.parsearTimestampSinTimezone(valor);
+  }
+
+  private parsearFechaFiltroFin(valor: string): Date {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(valor.trim())) {
+      return this.parsearTimestampSinTimezone(`${valor.trim()}T23:59:59`);
+    }
+
+    return this.parsearTimestampSinTimezone(valor);
   }
 }
