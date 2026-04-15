@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, BadRequestException } from '@nestjs/common';
 import { ConversacionesService } from './conversaciones.service';
 import { UpdateConversacioneDto } from './dto/update-conversacion.dto';
 import { CreateConversacionDto } from './dto/create-conversacion.dto';
@@ -12,12 +12,27 @@ export class ConversacionesController {
     return this.conversacionesService.create(createConversacioneDto);
   }
 
-   @Get()
-  findAll(
+  @Get()
+  findAllByAsesor(
+    @Query('asesorId') asesorId?: string,
+    @Query('fechaInicio') fechaInicio?: string,
+    @Query('fechaFin') fechaFin?: string,
     @Query('nombre') nombre?: string,
     @Query('numero') numero?: string,
   ) {
-    return this.conversacionesService.findAll(nombre, numero);
+    const id = Number(asesorId);
+
+    if (!asesorId || Number.isNaN(id) || id <= 0) {
+      throw new BadRequestException('asesorId es obligatorio');
+    }
+
+    return this.conversacionesService.findAllByAsesor(
+      id,
+      fechaInicio,
+      fechaFin,
+      nombre,
+      numero,
+    );
   }
 
   @Get(':id')

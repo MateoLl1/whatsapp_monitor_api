@@ -17,9 +17,11 @@ export class ConversacionesService {
 
   async create(dto: CreateConversacionDto) {
     const asesor = await this.asesoresRepo.findOneBy({ id: dto.co_asesor_id });
+
     if (!asesor) {
       throw new Error(`Asesor con id ${dto.co_asesor_id} no encontrado`);
     }
+
     const conversacion = this.conversacionesRepo.create({
       cliente_numero: dto.cliente_numero,
       nombre_cliente: dto.nombre_cliente,
@@ -28,16 +30,36 @@ export class ConversacionesService {
       estado: dto.estado,
       asesor,
     });
+
     return this.conversacionesRepo.save(conversacion);
   }
 
-  async findAll(nombre?: string, numero?: string) {
+  async findAllByAsesor(
+    asesorId: number,
+    fechaInicio?: string,
+    fechaFin?: string,
+    nombre?: string,
+    numero?: string,
+  ) {
     const qb = this.conversacionesRepo
       .createQueryBuilder('conversacion')
-      .leftJoinAndSelect('conversacion.asesor', 'asesor');
+      .leftJoinAndSelect('conversacion.asesor', 'asesor')
+      .where('asesor.id = :asesorId', { asesorId });
+
+    if (fechaInicio) {
+      qb.andWhere('conversacion.inicio >= :fechaInicio', {
+        fechaInicio: `${fechaInicio} 00:00:00`,
+      });
+    }
+
+    if (fechaFin) {
+      qb.andWhere('conversacion.inicio <= :fechaFin', {
+        fechaFin: `${fechaFin} 23:59:59`,
+      });
+    }
 
     if (nombre) {
-      qb.andWhere('LOWER(asesor.nombre) LIKE LOWER(:nombre)', {
+      qb.andWhere('LOWER(conversacion.nombre_cliente) LIKE LOWER(:nombre)', {
         nombre: `%${nombre}%`,
       });
     }
