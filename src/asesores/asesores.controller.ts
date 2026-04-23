@@ -25,9 +25,9 @@ export class AsesoresController {
     return this.asesoresService.findAll();
   }
 
-  @Get('/stats')
-  getStats() {
-    return this.asesoresService.getStats();
+  @Post('/stats')
+  getStats(@Body() body: { numeros?: string[]; rucs?: string[] }) {
+    return this.asesoresService.getStats(body.numeros, body.rucs);
   }
 
   @Post('/filter')

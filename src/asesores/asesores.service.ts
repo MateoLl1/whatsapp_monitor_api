@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, In, Repository } from 'typeorm';
+import { Between, Brackets, Repository } from 'typeorm';
 import { Asesor } from './entities/asesore.entity';
 import { CreateAsesorDto } from './dto/create-asesor.dto';
 import { UpdateAsesorDto } from './dto/update-asesor.dto';
@@ -20,6 +20,45 @@ export class AsesoresService {
     private mensajesRepo: Repository<Mensaje>,
     private readonly instanceService: InstanceService,
   ) {}
+
+  private limpiarDigitos(valor?: string): string {
+    return (valor || '').replace(/\D/g, '').trim();
+  }
+
+  private normalizarNumeroEcuador(valor?: string): string | null {
+    const digits = this.limpiarDigitos(valor);
+
+    if (!digits) return null;
+
+    if (digits.startsWith('593') && digits.length >= 11) return digits;
+
+    if (digits.startsWith('0') && digits.length >= 10) {
+      return '593' + digits.substring(1);
+    }
+
+    if (digits.length === 9) {
+      return '593' + digits;
+    }
+
+    return digits.length >= 11 ? digits : null;
+  }
+
+  private normalizarRuc(valor?: string): string | null {
+    const digits = this.limpiarDigitos(valor);
+    return digits ? digits : null;
+  }
+
+  private obtenerNumerosNormalizados(numeros?: string[]): string[] {
+    return [...new Set((numeros || [])
+      .map((x) => this.normalizarNumeroEcuador(x))
+      .filter((x): x is string => !!x))];
+  }
+
+  private obtenerRucsNormalizados(rucs?: string[]): string[] {
+    return [...new Set((rucs || [])
+      .map((x) => this.normalizarRuc(x))
+      .filter((x): x is string => !!x))];
+  }
 
   async create(dto: CreateAsesorDto) {
     const existente = await this.asesoresRepo.findOne({
@@ -48,19 +87,41 @@ export class AsesoresService {
   }
 
   async findByNumeroOrRuc(numeros?: string[], rucs?: string[]) {
-    const where: any[] = [];
+    const numerosNormalizados = this.obtenerNumerosNormalizados(numeros);
+    const rucsNormalizados = this.obtenerRucsNormalizados(rucs);
 
-    if (numeros && numeros.length > 0) {
-      where.push({ numero_whatsapp: In(numeros) });
+    if (numerosNormalizados.length === 0 && rucsNormalizados.length === 0) {
+      return [];
     }
 
-    if (rucs && rucs.length > 0) {
-      where.push({ ruc_tecnico: In(rucs) });
-    }
+    const qb = this.asesoresRepo.createQueryBuilder('asesor');
 
-    return this.asesoresRepo.find({
-      where,
-    });
+    qb.where(
+      new Brackets((subQb) => {
+        let agregado = false;
+
+        if (numerosNormalizados.length > 0) {
+          subQb.where('asesor.numero_whatsapp IN (:...numeros)', {
+            numeros: numerosNormalizados,
+          });
+          agregado = true;
+        }
+
+        if (rucsNormalizados.length > 0) {
+          if (agregado) {
+            subQb.orWhere('asesor.ruc_tecnico IN (:...rucs)', {
+              rucs: rucsNormalizados,
+            });
+          } else {
+            subQb.where('asesor.ruc_tecnico IN (:...rucs)', {
+              rucs: rucsNormalizados,
+            });
+          }
+        }
+      }),
+    );
+
+    return qb.getMany();
   }
 
   async findAll() {
@@ -112,18 +173,71 @@ export class AsesoresService {
     return this.instanceService.connectInstance(asesor.nombre);
   }
 
-  async getStats() {
-    const asesores = await this.asesoresRepo.find();
+  async getStats(numeros?: string[], rucs?: string[]) {
+    const numerosNormalizados = this.obtenerNumerosNormalizados(numeros);
+    const rucsNormalizados = this.obtenerRucsNormalizados(rucs);
+
+    let asesores: Asesor[] = [];
+
+    if (numerosNormalizados.length === 0 && rucsNormalizados.length === 0) {
+      asesores = await this.asesoresRepo.find();
+    } else {
+      const qb = this.asesoresRepo.createQueryBuilder('asesor');
+
+      qb.where(
+        new Brackets((subQb) => {
+          let agregado = false;
+
+          if (numerosNormalizados.length > 0) {
+            subQb.where('asesor.numero_whatsapp IN (:...numeros)', {
+              numeros: numerosNormalizados,
+            });
+            agregado = true;
+          }
+
+          if (rucsNormalizados.length > 0) {
+            if (agregado) {
+              subQb.orWhere('asesor.ruc_tecnico IN (:...rucs)', {
+                rucs: rucsNormalizados,
+              });
+            } else {
+              subQb.where('asesor.ruc_tecnico IN (:...rucs)', {
+                rucs: rucsNormalizados,
+              });
+            }
+          }
+        }),
+      );
+
+      asesores = await qb.getMany();
+    }
+
+    const asesorIds = asesores.map((x) => x.id);
     const total = asesores.length;
     const conectados = asesores.filter((a) => a.activo).length;
     const desconectados = total - conectados;
+
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
-    const mañana = new Date(hoy);
-    mañana.setDate(mañana.getDate() + 1);
-    const mensajesHoy = await this.mensajesRepo.count({
-      where: { fecha: Between(hoy, mañana) },
-    });
+
+    const manana = new Date(hoy);
+    manana.setDate(manana.getDate() + 1);
+
+    let mensajesHoy = 0;
+
+    if (asesorIds.length > 0) {
+      mensajesHoy = await this.mensajesRepo
+        .createQueryBuilder('mensaje')
+        .leftJoin('mensaje.conversacion', 'conversacion')
+        .leftJoin('conversacion.asesor', 'asesor')
+        .where('mensaje.fecha >= :hoy AND mensaje.fecha < :manana', {
+          hoy,
+          manana,
+        })
+        .andWhere('asesor.id IN (:...asesorIds)', { asesorIds })
+        .getCount();
+    }
+
     return { asesores: total, conectados, desconectados, mensajesHoy };
   }
 }
