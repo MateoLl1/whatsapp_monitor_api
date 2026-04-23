@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Between, In, Repository } from 'typeorm';
 import { CreateAsesorDto } from './dto/create-asesor.dto';
 import { UpdateAsesorDto } from './dto/update-asesor.dto';
 import { Asesor } from './entities/asesore.entity';
@@ -87,8 +87,6 @@ export class AsesoresService {
   }
 
   async getStats(numeros?: string[], rucs?: string[]) {
-    let asesores: Asesor[];
-
     const where: any[] = [];
 
     if (numeros?.length) {
@@ -99,28 +97,43 @@ export class AsesoresService {
       where.push({ ruc_tecnico: In(rucs) });
     }
 
-    if (where.length) {
-      asesores = await this.asesoresRepository.find({
-        where,
-        relations: {
-          conversaciones: true,
-        },
-      });
-    } else {
-      asesores = await this.asesoresRepository.find({
-        relations: {
-          conversaciones: true,
-        },
-      });
+    const asesores = await this.asesoresRepository.find({
+      ...(where.length ? { where } : {}),
+    });
+
+    const asesoresIds = asesores.map((a) => a.id);
+
+    const asesoresTotal = asesores.length;
+    const conectados = asesores.filter((asesor) => asesor.activo).length;
+    const desconectados = asesoresTotal - conectados;
+
+    const inicioHoy = new Date();
+    inicioHoy.setHours(0, 0, 0, 0);
+
+    const finHoy = new Date();
+    finHoy.setHours(23, 59, 59, 999);
+
+    let mensajesHoy = 0;
+
+    if (asesoresIds.length > 0) {
+      mensajesHoy = await this.mensajesRepository
+        .createQueryBuilder('mensaje')
+        .innerJoin('mensaje.conversacion', 'conversacion')
+        .innerJoin('conversacion.asesor', 'asesor')
+        .where('asesor.id IN (:...asesoresIds)', { asesoresIds })
+        .andWhere('mensaje.fecha BETWEEN :inicioHoy AND :finHoy', {
+          inicioHoy,
+          finHoy,
+        })
+        .getCount();
     }
 
-    return asesores.map((asesor) => ({
-      id: asesor.id,
-      nombre: asesor.nombre,
-      numero: asesor.numero_whatsapp,
-      ruc: asesor.ruc_tecnico,
-      total_conversaciones: asesor.conversaciones?.length ?? 0,
-    }));
+    return {
+      asesores: asesoresTotal,
+      conectados,
+      desconectados,
+      mensajesHoy,
+    };
   }
 
   async getAllStats() {
@@ -136,11 +149,11 @@ export class AsesoresService {
     const finHoy = new Date();
     finHoy.setHours(23, 59, 59, 999);
 
-    const mensajesHoy = await this.mensajesRepository
-      .createQueryBuilder('mensaje')
-      .where('mensaje.fecha >= :inicioHoy', { inicioHoy })
-      .andWhere('mensaje.fecha <= :finHoy', { finHoy })
-      .getCount();
+    const mensajesHoy = await this.mensajesRepository.count({
+      where: {
+        fecha: Between(inicioHoy, finHoy),
+      },
+    });
 
     return {
       asesores: asesoresTotal,
