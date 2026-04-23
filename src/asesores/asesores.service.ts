@@ -1,135 +1,167 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, In, Repository } from 'typeorm';
+import { Asesor } from './entities/asesore.entity';
 import { CreateAsesorDto } from './dto/create-asesor.dto';
 import { UpdateAsesorDto } from './dto/update-asesor.dto';
-import { Asesor } from './entities/asesore.entity';
 import { Mensaje } from '../mensajes/entities/mensaje.entity';
+import { InstanceService } from '../evolution/services/instance.service';
 
 @Injectable()
 export class AsesoresService {
   constructor(
     @InjectRepository(Asesor)
-    private readonly asesoresRepository: Repository<Asesor>,
+    private asesoresRepo: Repository<Asesor>,
     @InjectRepository(Mensaje)
-    private readonly mensajesRepository: Repository<Mensaje>,
+    private mensajesRepo: Repository<Mensaje>,
+    private readonly instanceService: InstanceService,
   ) {}
 
-  create(dto: CreateAsesorDto) {
-    const asesor = this.asesoresRepository.create(dto);
-    return this.asesoresRepository.save(asesor);
-  }
-
-  findAll() {
-    return this.asesoresRepository.find({
-      order: {
-        id: 'DESC',
-      },
-    });
-  }
-
-  async findOne(id: number) {
-    const asesor = await this.asesoresRepository.findOne({
-      where: { id },
+  async create(dto: CreateAsesorDto) {
+    const existente = await this.asesoresRepo.findOne({
+      where: { nombre: dto.nombre },
     });
 
-    if (!asesor) {
-      throw new NotFoundException('Asesor no encontrado');
+    if (existente) {
+      try {
+        await this.instanceService.getConnectionState(existente.nombre);
+        throw new ConflictException(
+          `Ya existe un asesor con el nombre "${dto.nombre}"`,
+        );
+      } catch (error: any) {
+        if (error.status === 404) {
+          await this.instanceService.createInstance(existente.nombre);
+          return existente;
+        }
+        throw error;
+      }
     }
 
-    return asesor;
-  }
-
-  async update(id: number, dto: UpdateAsesorDto) {
-    const asesor = await this.findOne(id);
-    Object.assign(asesor, dto);
-    return this.asesoresRepository.save(asesor);
-  }
-
-  async remove(id: number) {
-    const asesor = await this.findOne(id);
-    return this.asesoresRepository.remove(asesor);
-  }
-
-  async connect(id: string) {
-    const asesor = await this.findOne(+id);
-    return {
-      ok: true,
-      asesor,
-    };
+    const asesor = this.asesoresRepo.create(dto);
+    const saved = await this.asesoresRepo.save(asesor);
+    await this.instanceService.createInstance(saved.nombre);
+    return saved;
   }
 
   async findByNumeroOrRuc(numeros?: string[], rucs?: string[]) {
     const where: any[] = [];
 
-    if (numeros?.length) {
+    if (numeros && numeros.length > 0) {
       where.push({ numero_whatsapp: In(numeros) });
     }
 
-    if (rucs?.length) {
+    if (rucs && rucs.length > 0) {
       where.push({ ruc_tecnico: In(rucs) });
     }
 
     if (!where.length) {
-      return this.asesoresRepository.find({
-        order: {
-          id: 'DESC',
-        },
+      return this.asesoresRepo.find();
+    }
+
+    return this.asesoresRepo.find({
+      where,
+    });
+  }
+
+  async findAll() {
+    const [asesores, instances] = await Promise.all([
+      this.asesoresRepo.find(),
+      this.instanceService.fetchInstances(),
+    ]);
+
+    return asesores.map((asesor) => {
+      const instance = instances.find((i: any) => i.name === asesor.nombre);
+      return {
+        ...asesor,
+        estado: instance?.connectionStatus === 'open' ? 'activo' : 'inactivo',
+        instancia: instance?.id || null,
+      };
+    });
+  }
+
+  findOne(id: number) {
+    return this.asesoresRepo.findOneBy({ id });
+  }
+
+  update(id: number, dto: UpdateAsesorDto) {
+    return this.asesoresRepo.update(id, dto);
+  }
+
+  async remove(id: number) {
+    const asesor = await this.findOne(id);
+
+    if (asesor) {
+      await this.instanceService.deleteInstance(asesor.nombre);
+    }
+
+    return this.asesoresRepo.delete(id);
+  }
+
+  async connect(idOrNombre: string) {
+    let asesor;
+    const id = Number(idOrNombre);
+
+    if (!isNaN(id)) {
+      asesor = await this.findOne(id);
+    } else {
+      asesor = await this.asesoresRepo.findOne({
+        where: { nombre: idOrNombre },
       });
     }
 
-    return this.asesoresRepository.find({
-      where,
-      order: {
-        id: 'DESC',
-      },
-    });
+    if (!asesor) {
+      throw new NotFoundException('Asesor no encontrado');
+    }
+
+    return this.instanceService.connectInstance(asesor.nombre);
   }
 
   async getStats(numeros?: string[], rucs?: string[]) {
     const where: any[] = [];
 
-    if (numeros?.length) {
+    if (numeros && numeros.length > 0) {
       where.push({ numero_whatsapp: In(numeros) });
     }
 
-    if (rucs?.length) {
+    if (rucs && rucs.length > 0) {
       where.push({ ruc_tecnico: In(rucs) });
     }
 
-    const asesores = await this.asesoresRepository.find({
+    const asesores = await this.asesoresRepo.find({
       ...(where.length ? { where } : {}),
     });
 
-    const asesoresIds = asesores.map((a) => a.id);
+    const total = asesores.length;
+    const conectados = asesores.filter((a) => a.activo).length;
+    const desconectados = total - conectados;
 
-    const asesoresTotal = asesores.length;
-    const conectados = asesores.filter((asesor) => asesor.activo).length;
-    const desconectados = asesoresTotal - conectados;
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
 
-    const inicioHoy = new Date();
-    inicioHoy.setHours(0, 0, 0, 0);
-
-    const finHoy = new Date();
-    finHoy.setHours(23, 59, 59, 999);
+    const manana = new Date(hoy);
+    manana.setDate(manana.getDate() + 1);
 
     let mensajesHoy = 0;
 
-    if (asesoresIds.length > 0) {
-      mensajesHoy = await this.mensajesRepository
+    if (asesores.length > 0) {
+      const asesorIds = asesores.map((a) => a.id);
+
+      mensajesHoy = await this.mensajesRepo
         .createQueryBuilder('mensaje')
         .innerJoin('mensaje.conversacion', 'conversacion')
         .innerJoin('conversacion.asesor', 'asesor')
-        .where('asesor.id IN (:...asesoresIds)', { asesoresIds })
-        .andWhere('mensaje.fecha BETWEEN :inicioHoy AND :finHoy', {
-          inicioHoy,
-          finHoy,
-        })
+        .where('asesor.id IN (:...asesorIds)', { asesorIds })
+        .andWhere('mensaje.fecha >= :hoy', { hoy })
+        .andWhere('mensaje.fecha < :manana', { manana })
         .getCount();
     }
 
     return {
-      asesores: asesoresTotal,
+      asesores: total,
       conectados,
       desconectados,
       mensajesHoy,
@@ -137,26 +169,26 @@ export class AsesoresService {
   }
 
   async getAllStats() {
-    const asesores = await this.asesoresRepository.find();
+    const asesores = await this.asesoresRepo.find();
 
-    const asesoresTotal = asesores.length;
-    const conectados = asesores.filter((asesor) => asesor.activo).length;
-    const desconectados = asesoresTotal - conectados;
+    const total = asesores.length;
+    const conectados = asesores.filter((a) => a.activo).length;
+    const desconectados = total - conectados;
 
-    const inicioHoy = new Date();
-    inicioHoy.setHours(0, 0, 0, 0);
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
 
-    const finHoy = new Date();
-    finHoy.setHours(23, 59, 59, 999);
+    const manana = new Date(hoy);
+    manana.setDate(manana.getDate() + 1);
 
-    const mensajesHoy = await this.mensajesRepository.count({
+    const mensajesHoy = await this.mensajesRepo.count({
       where: {
-        fecha: Between(inicioHoy, finHoy),
+        fecha: Between(hoy, manana),
       },
     });
 
     return {
-      asesores: asesoresTotal,
+      asesores: total,
       conectados,
       desconectados,
       mensajesHoy,
