@@ -25,6 +25,11 @@ export class AsesoresController {
     return this.asesoresService.findAll();
   }
 
+  @Get('/stats')
+  getAllStats() {
+    return this.asesoresService.getAllStats();
+  }
+
   @Post('/stats')
   getStats(@Body() body: { numeros?: string[]; rucs?: string[] }) {
     return this.asesoresService.getStats(body.numeros, body.rucs);
