@@ -15,7 +15,7 @@ services:
       APP_PORT: 3000
       NODE_ENV: production
       
-      PUBLIC_ORIGIN: https://storage.autoconsa.com
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-https://wamonitor.autoconsa.com}
 
 
       FRONTEND_USER: admin
