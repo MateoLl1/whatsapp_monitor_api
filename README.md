@@ -42,11 +42,23 @@ Backend desarrollado en NestJS que sirve una aplicación Angular embebida y gest
 ```
 rmdir /s /q dist
 ```
-2. Crear el build del proyecto
+2. Crear el build del proyecto (Opcional)
+```
+del /q src\migrations\*.ts
+```
+3. Crear el build del proyecto (Opcional)
 ```
 npm run build
 ```
-3. Compilar el proyecto
+4. Crear el build del proyecto (Opcional)
+```
+npx typeorm migration:generate src/migrations/InitSchemaCompleto -d dist/data-source.js
+```
+5. Crear el build del proyecto
+```
+npm run build
+```
+6. Compilar el proyecto
 ```
 npx typeorm migration:run -d dist/data-source.js
 ```

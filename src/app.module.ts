@@ -15,6 +15,7 @@ import { FilesModule } from './files/files.module';
 import { AuthModule } from './auth/auth.module';
 import { SiacModule } from './siac/siac.module';
 import { MediaModule } from './media/media.module';
+import { AsesorConexionesModule } from './asesor-conexiones/asesor-conexiones.module';
 
 
 
@@ -30,7 +31,7 @@ import { MediaModule } from './media/media.module';
       password: process.env.DB_PASS,
       database: process.env.DB_NAME,
       autoLoadEntities: true,
-      synchronize: true,
+      synchronize: false,
     }),
 
     ServeStaticModule.forRoot({
@@ -46,7 +47,8 @@ import { MediaModule } from './media/media.module';
     EvolutionModule,
     FilesModule,
     SiacModule,
-    MediaModule
+    MediaModule,
+    AsesorConexionesModule
   ],
   controllers: [AppController],
   providers: [AppService],
