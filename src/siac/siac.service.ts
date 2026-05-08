@@ -132,7 +132,7 @@ export class SiacService {
       .innerJoin('conv.asesor', 'asesor')
       .where('asesor.id IN (:...asesorIds)', { asesorIds })
       .andWhere('conv.cliente_numero = :cliente', { cliente: params.cliente })
-      .select("to_char(msg.fecha, 'YYYY-MM-DD HH24:MI:SS')", 'fecha')
+      .select('msg.fecha', 'fecha')
       .addSelect('msg.mensaje', 'mensaje')
       .addSelect('msg.fromMe', 'fromMe')
       .addSelect('msg.objeto', 'objeto')
@@ -144,9 +144,9 @@ export class SiacService {
 
     if (params.after) {
       const afterDate = new Date(params.after);
-      if (!isNaN(afterDate.getTime())) {
-        qb.andWhere("(msg.fecha AT TIME ZONE 'America/Guayaquil') > :after", {
-          after: afterDate.toISOString(),
+      if (!Number.isNaN(afterDate.getTime())) {
+        qb.andWhere('msg.fecha > :after', {
+          after: this.formatearFechaApi(afterDate),
         });
       }
     }
@@ -178,7 +178,7 @@ export class SiacService {
         const adjuntoNombre = isFile ? getNombreArchivo(objeto) : null;
 
         return {
-          fecha: r.fecha,
+          fecha: this.formatearFechaApi(r.fecha),
           asesor_nombre: r.asesor_nombre ?? '',
           asesor_numero: r.asesor_numero ?? '',
           asesor_ruc: r.asesor_ruc ?? '',
@@ -191,6 +191,23 @@ export class SiacService {
         };
       }),
     };
+  }
+
+  private formatearFechaApi(value: Date | string | null) {
+    if (!value) return '';
+
+    if (typeof value === 'string') {
+      return value.replace('T', ' ').replace('Z', '').substring(0, 19);
+    }
+
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const day = String(value.getDate()).padStart(2, '0');
+    const hour = String(value.getHours()).padStart(2, '0');
+    const minute = String(value.getMinutes()).padStart(2, '0');
+    const second = String(value.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
   }
 
   private normalizarIdentificacion(value?: string | null) {
