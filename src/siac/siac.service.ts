@@ -7,6 +7,9 @@ import { GetSiacMensajesDto } from './dto/get-siac-mensajes.dto';
 import { GetSiacMensajesHistorialDto } from './dto/get-siac-mensajes-historial.dto';
 import { MediaUrlService } from '../media/services/media-url.service';
 
+const DEFAULT_PAGE_SIZE = 10;
+const MAX_PAGE_SIZE = 2000;
+
 @Injectable()
 export class SiacService {
   constructor(
@@ -71,6 +74,8 @@ export class SiacService {
       asesores,
       after: body.after,
       limit: body.limit,
+      page: body.page,
+      pageSize: body.pageSize,
     });
   }
 
@@ -122,16 +127,42 @@ export class SiacService {
     asesores: Asesor[];
     after?: string;
     limit?: number;
+    page?: number;
+    pageSize?: number;
   }) {
     const asesorIds = params.asesores.map((x) => x.id);
-    const limit = params.limit ?? 500;
 
-    const qb = this.mensajeRepo
+    const usaPaginacion = !!params.page || !!params.pageSize;
+
+    const page = params.page && params.page > 0 ? params.page : 1;
+    const pageSizeBase = params.pageSize ?? DEFAULT_PAGE_SIZE;
+    const pageSize = Math.min(Math.max(pageSizeBase, 1), MAX_PAGE_SIZE);
+    const offset = (page - 1) * pageSize;
+
+    const baseQb = this.mensajeRepo
       .createQueryBuilder('msg')
       .innerJoin('msg.conversacion', 'conv')
       .innerJoin('conv.asesor', 'asesor')
       .where('asesor.id IN (:...asesorIds)', { asesorIds })
-      .andWhere('conv.cliente_numero = :cliente', { cliente: params.cliente })
+      .andWhere('conv.cliente_numero = :cliente', { cliente: params.cliente });
+
+    if (params.after) {
+      const afterDate = new Date(params.after);
+      if (!Number.isNaN(afterDate.getTime())) {
+        baseQb.andWhere('msg.fecha > :after', {
+          after: this.formatearFechaApi(afterDate),
+        });
+      }
+    }
+
+    let total = 0;
+
+    if (usaPaginacion) {
+      total = await baseQb.clone().getCount();
+    }
+
+    const qb = baseQb
+      .clone()
       .select('msg.fecha', 'fecha')
       .addSelect('msg.mensaje', 'mensaje')
       .addSelect('msg.fromMe', 'fromMe')
@@ -140,15 +171,12 @@ export class SiacService {
       .addSelect('asesor.numero_whatsapp', 'asesor_numero')
       .addSelect('asesor.ruc_tecnico', 'asesor_ruc')
       .orderBy('msg.fecha', 'ASC')
-      .take(limit);
+      .addOrderBy('msg.id', 'ASC');
 
-    if (params.after) {
-      const afterDate = new Date(params.after);
-      if (!Number.isNaN(afterDate.getTime())) {
-        qb.andWhere('msg.fecha > :after', {
-          after: this.formatearFechaApi(afterDate),
-        });
-      }
+    if (usaPaginacion) {
+      qb.offset(offset).limit(pageSize);
+    } else {
+      qb.take(params.limit ?? 500);
     }
 
     const rows = await qb.getRawMany();
@@ -168,7 +196,7 @@ export class SiacService {
 
     const primerAsesor = params.asesores[0];
 
-    return {
+    const response: any = {
       asesor_nombre: primerAsesor?.nombre ?? '',
       asesor_numero: primerAsesor?.numero_whatsapp ?? '',
       cliente_numero: params.cliente,
@@ -191,6 +219,21 @@ export class SiacService {
         };
       }),
     };
+
+    if (usaPaginacion) {
+      const totalPages = Math.ceil(total / pageSize);
+
+      response.pagination = {
+        page,
+        pageSize,
+        total,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      };
+    }
+
+    return response;
   }
 
   private formatearFechaApi(value: Date | string | null) {
