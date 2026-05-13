@@ -279,7 +279,7 @@ export class SiacService {
       return `593${digits}`;
     }
 
-    if (digits.length > 9) {
+    if (digits.length > 9) { 
       const last9 = digits.substring(digits.length - 9);
       if (last9.startsWith('9')) {
         return `593${last9}`;
