@@ -163,7 +163,7 @@ export class SiacService {
 
     const qb = baseQb
       .clone()
-      .select('msg.fecha', 'fecha')
+      .select("to_char(msg.fecha, 'YYYY-MM-DD HH24:MI:SS')", 'fecha')
       .addSelect('msg.mensaje', 'mensaje')
       .addSelect('msg.fromMe', 'fromMe')
       .addSelect('msg.objeto', 'objeto')
@@ -206,7 +206,7 @@ export class SiacService {
         const adjuntoNombre = isFile ? getNombreArchivo(objeto) : null;
 
         return {
-          fecha: this.formatearFechaApi(r.fecha),
+          fecha: r.fecha ?? '',
           asesor_nombre: r.asesor_nombre ?? '',
           asesor_numero: r.asesor_numero ?? '',
           asesor_ruc: r.asesor_ruc ?? '',

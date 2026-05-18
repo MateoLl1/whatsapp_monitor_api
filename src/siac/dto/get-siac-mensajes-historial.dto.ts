@@ -48,6 +48,7 @@ export class GetSiacMensajesHistorialDto {
   limit?: number;
 
   @IsOptional()
+  
   @Type(() => Number)
   @IsInt()
   @Min(1)
