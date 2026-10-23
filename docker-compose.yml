@@ -44,6 +44,18 @@ services:
       KEYCLOAK_CLIENT_SECRET: 6VwfzFCs4TYlbjDSMkZHhEvFJTQh4dP0
       KEYCLOAK_REALM_PUBLIC_KEY: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQE...
 
+      # Reportes WhatsApp (SQL Server + Callbell). Si faltan, solo esos endpoints responden 503
+      WHATSAPP_DB_HOST: ${WHATSAPP_DB_HOST:-}
+      WHATSAPP_DB_PORT: ${WHATSAPP_DB_PORT:-1433}
+      WHATSAPP_DB_USER: ${WHATSAPP_DB_USER:-}
+      WHATSAPP_DB_PASSWORD: ${WHATSAPP_DB_PASSWORD:-}
+      WHATSAPP_DB_NAME: ${WHATSAPP_DB_NAME:-}
+      WHATSAPP_DB_ENCRYPT: ${WHATSAPP_DB_ENCRYPT:-false}
+      WHATSAPP_DB_TRUST_CERT: ${WHATSAPP_DB_TRUST_CERT:-true}
+      WHATSAPP_DB_INSTANCIA: ${WHATSAPP_DB_INSTANCIA:-}
+      CALLBELL_API_BASE: ${CALLBELL_API_BASE:-https://api.callbell.eu/v1}
+      CALLBELL_BEARER_TOKEN: ${CALLBELL_BEARER_TOKEN:-}
+
     depends_on:
       postgres:
         condition: service_healthy

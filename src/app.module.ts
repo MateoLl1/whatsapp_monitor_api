@@ -16,6 +16,7 @@ import { AuthModule } from './auth/auth.module';
 import { SiacModule } from './siac/siac.module';
 import { MediaModule } from './media/media.module';
 import { AsesorConexionesModule } from './asesor-conexiones/asesor-conexiones.module';
+import { WhatsappReportModule } from './whatsapp-report/whatsapp-report.module';
 
 
 
@@ -48,7 +49,8 @@ import { AsesorConexionesModule } from './asesor-conexiones/asesor-conexiones.mo
     FilesModule,
     SiacModule,
     MediaModule,
-    AsesorConexionesModule
+    AsesorConexionesModule,
+    WhatsappReportModule
   ],
   controllers: [AppController],
   providers: [AppService],
