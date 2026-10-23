@@ -83,7 +83,8 @@ services:
     restart: unless-stopped
 
   evolution-api:
-    image: evoapicloud/evolution-api:homolog
+    # Versión estable fijada. No usar "homolog": es la rama de pruebas y sus builds pueden romperse
+    image: evoapicloud/evolution-api:v2.3.7
     container_name: evolution-api
     environment:
       AUTHENTICATION_API_KEY: ae47be328779c370275bf95e61c4feeB8
